@@ -43,15 +43,13 @@ int main_kernel_count()
 
 	for (unsigned int byte_index = base_tasklet; byte_index < input_size_dpu_bytes; byte_index += BLOCK_SIZE * NR_TASKLETS) {
 		mram_read((__mram_ptr void const*)(mram_base_addr + byte_index), cache, BLOCK_SIZE);
-		if (byte_index + (BLOCK_SIZE / sizeof(T) - 1) >= input_size_dpu_bytes) {
+		if (byte_index + (BLOCK_SIZE - 1) >= input_size_dpu_bytes) {
 			for (unsigned int i = 0; byte_index + (i * sizeof(T)) < input_size_dpu_bytes; i++) {
 				local_count += _pred_f(cache[i], DPU_INPUT_ARGUMENTS.predicate_arg) * 1;
-				//local_count += (cache[i] <= 123) * 1;
 			}
 		} else {
 			for (unsigned int i = 0; i < BLOCK_SIZE / sizeof(T); i++) {
 				local_count += _pred_f(cache[i], DPU_INPUT_ARGUMENTS.predicate_arg) * 1;
-				//local_count += (cache[i] <= 123) * 1;
 			}
 		}
 	}
