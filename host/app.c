@@ -11,6 +11,7 @@
 #include "benchmark.h"
 #include "common.h"
 #include "params.h"
+#include "timer.h"
 
 static T* database;
 uint32_t* bitmasks;
@@ -22,6 +23,8 @@ uint32_t n_dpus;
 uint32_t n_ranks;
 
 unsigned int n_elements_dpu, n_fill_dpu;
+
+double time_alloc, time_load, time_write_data, time_write_command, time_run, time_read_result, time_read_data;
 
 static void create_db(T* db, unsigned int nr_elements)
 {
@@ -55,6 +58,7 @@ static void host_select(T* db, uint32_t* out, unsigned int nr_elements, enum pre
 unsigned int upmem_count(unsigned int n_elements_dpu, enum predicates predicate, uint64_t argument)
 {
 	unsigned int i = 0;
+	startTimer();
 	DPU_FOREACH(dpu_set, dpu, i) {
 		input_arguments[i].size = n_elements_dpu * sizeof(T);
 		input_arguments[i].kernel = kernel_count;
@@ -66,7 +70,13 @@ unsigned int upmem_count(unsigned int n_elements_dpu, enum predicates predicate,
 		DPU_ASSERT(dpu_prepare_xfer(dpu, &input_arguments[i]));
 	}
 	DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_TO_DPU, "DPU_INPUT_ARGUMENTS", 0, sizeof(dpu_arguments_t), DPU_XFER_DEFAULT));
+	time_write_command = stopTimer();
+
+	startTimer();
 	DPU_ASSERT(dpu_launch(dpu_set, DPU_SYNCHRONOUS));
+	time_run = stopTimer();
+
+	startTimer();
 	DPU_FOREACH(dpu_set, dpu, i) {
 		DPU_ASSERT(dpu_prepare_xfer(dpu, &dpu_results[i]));
 	}
@@ -76,6 +86,7 @@ unsigned int upmem_count(unsigned int n_elements_dpu, enum predicates predicate,
 		//printf("DPU %4d count == %d\n", i, dpu_results[i].count);
 		result_dpu += dpu_results[i].count;
 	}
+	time_read_result = stopTimer();
 	return result_dpu;
 }
 
@@ -95,8 +106,14 @@ int main(int argc, char **argv)
 
 	parse_params(argc, argv, &p);
 
+	startTimer();
 	DPU_ASSERT(dpu_alloc_ranks(p.n_ranks, NULL, &dpu_set));
+	time_alloc = stopTimer();
+
+	startTimer();
 	DPU_ASSERT(dpu_load(dpu_set, "bin/dpu_code", NULL));
+	time_load = stopTimer();
+
 	DPU_ASSERT(dpu_get_nr_dpus(dpu_set, &n_dpus));
 	DPU_ASSERT(dpu_get_nr_ranks(dpu_set, &n_ranks));
 
@@ -136,13 +153,18 @@ int main(int argc, char **argv)
 	memset(bitmasks, 0, p.n_elements * sizeof(uint32_t) / 32);
 	create_db(database, p.n_elements);
 
+	startTimer();
 	db_to_upmem(n_elements_dpu);
+	time_write_data = stopTimer();
 
 	for (unsigned int i = 0; i < sizeof(benchmark_ops) / sizeof(struct benchmark_op); i++) {
 		result_upmem = upmem_count(n_elements_dpu, benchmark_ops[i].predicate, benchmark_ops[i].argument);
-		result_host = host_count(database, p.n_elements, benchmark_ops[i].predicate, benchmark_ops[i].argument);
-		printf("count = %d / %d\n", result_host, result_upmem);
-		assert(result_host == result_upmem);
+		printf("latency_alloc_us=%f\n latency_load=%f latency_write_data=%f latency_write_command=%f latency_kernel=%f latency_read_result=%f latency_read_data=%f", time_alloc, time_load, time_write_data, time_write_command, time_run, time_read_result, 0);
+		if (p.verify) {
+			result_host = host_count(database, p.n_elements, benchmark_ops[i].predicate, benchmark_ops[i].argument);
+			printf("count = %d / %d\n", result_host, result_upmem);
+			assert(result_host == result_upmem);
+		}
 	}
 
 

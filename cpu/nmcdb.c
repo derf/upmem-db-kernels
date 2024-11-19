@@ -11,6 +11,7 @@
 #include "benchmark.h"
 #include "common.h"
 #include "params.h"
+#include "timer.h"
 
 static T* database;
 uint32_t* bitmasks;
@@ -49,6 +50,7 @@ static void host_select(T* db, uint32_t* out, unsigned int n_elements, enum pred
 
 int main(int argc, char **argv)
 {
+	double time;
 	struct Params p;
 
 	parse_params(argc, argv, &p);
@@ -64,8 +66,10 @@ int main(int argc, char **argv)
 	create_db(database, p.n_elements);
 
 	for (unsigned int i = 0; i < sizeof(benchmark_ops) / sizeof(struct benchmark_op); i++) {
+		startTimer();
 		unsigned int result_host = host_count(database, p.n_elements, benchmark_ops[i].predicate, benchmark_ops[i].argument, p.n_threads);
-		printf("count = %d\n", result_host);
+		time = stopTimer();
+		printf("count = %d (%f)\n", result_host, time);
 	}
 
 	free(database);
