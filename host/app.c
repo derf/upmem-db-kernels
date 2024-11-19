@@ -73,15 +73,24 @@ unsigned int upmem_count(unsigned int n_elements_dpu, enum predicates predicate,
 	DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_FROM_DPU, "DPU_RESULTS", 0, sizeof(dpu_results_t), DPU_XFER_DEFAULT));
 	unsigned int result_dpu = 0;
 	for (i = 0; i < n_dpus; i++) {
+		//printf("DPU %4d count == %d\n", i, dpu_results[i].count);
 		result_dpu += dpu_results[i].count;
 	}
 	return result_dpu;
 }
 
+void db_to_upmem(unsigned int n_elements_dpu)
+{
+	unsigned int i = 0;
+	DPU_FOREACH(dpu_set, dpu, i) {
+		DPU_ASSERT(dpu_prepare_xfer(dpu, database + n_elements_dpu * i));
+	}
+	DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_TO_DPU, DPU_MRAM_HEAP_POINTER_NAME, 0, n_elements_dpu * sizeof(T), DPU_XFER_DEFAULT));
+}
+
 int main(int argc, char **argv)
 {
 	struct Params p;
-	unsigned int i = 0;
 	unsigned int result_upmem, result_host;
 
 	parse_params(argc, argv, &p);
@@ -101,8 +110,6 @@ int main(int argc, char **argv)
 	 */
 	assert(n_dpus * 8126464 > p.n_elements);
 
-	assert(p.n_elements % 32 == 0);
-
 	n_elements_dpu = p.n_elements / n_dpus;
 	n_fill_dpu = 0;
 	if (p.n_elements % n_dpus) {
@@ -117,7 +124,7 @@ int main(int argc, char **argv)
 	database = malloc(p.n_elements * sizeof(T));
 	assert(database != NULL);
 
-	bitmasks = malloc(p.n_elements * sizeof(uint32_t) / 32);
+	bitmasks = malloc(p.n_elements * sizeof(uint32_t) / 32 + (p.n_elements % 32 ? sizeof(uint32_t) : 0));
 	assert(bitmasks != NULL);
 
 	input_arguments = malloc(n_dpus * sizeof(dpu_arguments_t));
@@ -129,10 +136,7 @@ int main(int argc, char **argv)
 	memset(bitmasks, 0, p.n_elements * sizeof(uint32_t) / 32);
 	create_db(database, p.n_elements);
 
-	DPU_FOREACH(dpu_set, dpu, i) {
-		DPU_ASSERT(dpu_prepare_xfer(dpu, database + n_elements_dpu * i));
-	}
-	DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_TO_DPU, DPU_MRAM_HEAP_POINTER_NAME, 0, n_elements_dpu * sizeof(T), DPU_XFER_DEFAULT));
+	db_to_upmem(n_elements_dpu);
 
 	for (unsigned int i = 0; i < sizeof(benchmark_ops) / sizeof(struct benchmark_op); i++) {
 		result_upmem = upmem_count(n_elements_dpu, benchmark_ops[i].predicate, benchmark_ops[i].argument);
