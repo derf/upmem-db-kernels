@@ -1,10 +1,12 @@
 NR_TASKLETS ?= 16
 BL ?= 10
 
-CFLAGS := -Wall -Wextra -Iinclude
-HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 $$(dpu-pkg-config --cflags --libs dpu) -ggdb -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
+CFLAGS := -Wall -Wextra -pedantic -Iinclude
+CPU_FLAGS := ${CFLAGS} -std=c11 -O3 -march=native -fopenmp
+HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
 DPU_CFLAGS := ${CFLAGS} -O2 -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
 
+CPU_SOURCES := $(wildcard cpu/*.c)
 HOST_SOURCES := $(wildcard host/*.c)
 DPU_SOURCES := $(wildcard dpu/*.c)
 
@@ -14,10 +16,13 @@ ifdef verbose
 	QUIET =
 endif
 
-all: bin/host_code bin/dpu_code
+all: bin/cpu_code bin/host_code bin/dpu_code
 
 bin:
 	${QUIET}mkdir -p bin
+
+bin/cpu_code: bin ${CPU_SOURCES}
+	${QUIET}${CC} ${CPU_FLAGS} -o $@ ${CPU_SOURCES}
 
 bin/host_code: bin ${HOST_SOURCES}
 	${QUIET}${CC} ${HOST_CFLAGS} -o $@ ${HOST_SOURCES}
