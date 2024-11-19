@@ -14,7 +14,8 @@
 
 enum kernels {
 	kernel_count = 0,
-	nr_kernels = 1,
+	kernel_select = 1,
+	nr_kernels = 2,
 };
 
 enum predicates {
