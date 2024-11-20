@@ -44,7 +44,7 @@ static void host_insert(unsigned int n_insert)
 	database = realloc(database, (n_elements + n_insert) * sizeof(T));
 	assert(database != NULL);
 
-	bitmasks = realloc(bitmasks, (n_elements + n_insert) * sizeof(uint32_t) / 32 + 1);
+	bitmasks = realloc(bitmasks, (n_elements + n_insert) / 32 * sizeof(uint32_t) + sizeof(uint32_t));
 	assert(bitmasks != NULL);
 
 	for (unsigned int i = n_elements; i < n_elements + n_insert; i++) {
@@ -83,7 +83,7 @@ static unsigned int host_delete(enum predicates pred, unsigned int pred_arg)
 	database = realloc(database, (n_elements - n_delete) * sizeof(T));
 	assert(database != NULL);
 
-	bitmasks = realloc(bitmasks, (n_elements - n_delete) * sizeof(uint32_t) / 32 + 1);
+	bitmasks = realloc(bitmasks, (n_elements - n_delete) / 32 * sizeof(uint32_t) + sizeof(uint32_t));
 	assert(bitmasks != NULL);
 
 	n_elements -= n_delete;
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 	database = malloc(n_elements * sizeof(T));
 	assert(database != NULL);
 
-	bitmasks = malloc(n_elements * sizeof(uint32_t) / 32 + 1);
+	bitmasks = malloc(n_elements / 32 * sizeof(uint32_t) + sizeof(uint32_t));
 	assert(bitmasks != NULL);
 
 	create_db();
