@@ -42,7 +42,7 @@ int main_kernel_count()
 	uint32_t local_count = 0;
 	uint32_t total_count = 0;
 
-	bool (*_pred_f)(const uint64_t, const uint64_t) = get_pred(DPU_INPUT_ARGUMENTS.predicate);
+	bool (*_pred_f)(uint64_t const, uint64_t const) = get_pred(DPU_INPUT_ARGUMENTS.predicate);
 
 	for (unsigned int byte_index = base_tasklet; byte_index < input_size_dpu_bytes; byte_index += BLOCK_SIZE * NR_TASKLETS) {
 		mram_read((__mram_ptr void const*)(mram_base_addr + byte_index), cache, BLOCK_SIZE);
@@ -93,7 +93,7 @@ int main_kernel_select()
 	T* cache = (T*) mem_alloc(BLOCK_SIZE);
 	uint32_t* bitmask_cache = (uint32_t*) mem_alloc(BLOCK_SIZE / sizeof(T) / 32 * sizeof(uint32_t));
 
-	bool (*_pred_f)(const uint64_t, const uint64_t) = get_pred(DPU_INPUT_ARGUMENTS.predicate);
+	bool (*_pred_f)(uint64_t const, uint64_t const) = get_pred(DPU_INPUT_ARGUMENTS.predicate);
 
 	for (unsigned int byte_index = base_tasklet; byte_index < input_size_dpu_bytes; byte_index += BLOCK_SIZE * NR_TASKLETS) {
 		memset(bitmask_cache, 0, BLOCK_SIZE / sizeof(T) / 32 * sizeof(uint32_t));

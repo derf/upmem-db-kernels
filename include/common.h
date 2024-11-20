@@ -42,40 +42,40 @@ typedef struct {
 	uint64_t count;
 } dpu_results_t;
 
-static bool _pred_lt(const uint64_t x, const uint64_t arg)
+static bool _pred_lt(uint64_t const x, uint64_t const arg)
 {
 	return x < arg;
 }
-static bool _pred_le(const uint64_t x, const uint64_t arg)
+static bool _pred_le(uint64_t const x, uint64_t const arg)
 {
 	return x <= arg;
 }
-static bool _pred_eq(const uint64_t x, const uint64_t arg)
+static bool _pred_eq(uint64_t const x, uint64_t const arg)
 {
 	return x == arg;
 }
-static bool _pred_ge(const uint64_t x, const uint64_t arg)
+static bool _pred_ge(uint64_t const x, uint64_t const arg)
 {
 	return x >= arg;
 }
-static bool _pred_gt(const uint64_t x, const uint64_t arg)
+static bool _pred_gt(uint64_t const x, uint64_t const arg)
 {
 	return x > arg;
 }
-static bool _pred_ne(const uint64_t x, const uint64_t arg)
+static bool _pred_ne(uint64_t const x, uint64_t const arg)
 {
 	return x > arg;
 }
-static bool _pred_bs(const uint64_t x, const uint64_t arg)
+static bool _pred_bs(uint64_t const x, uint64_t const arg)
 {
 	return x & (1<<arg);
 }
-static bool _pred_bc(const uint64_t x, const uint64_t arg)
+static bool _pred_bc(uint64_t const x, uint64_t const arg)
 {
 	return !(x & (1<<arg));
 }
 
-bool (*const predicate_functions[num_predicates])(const uint64_t, const uint64_t) = {
+bool (*const predicate_functions[num_predicates])(uint64_t const, uint64_t const) = {
 	_pred_lt,
 	_pred_le,
 	_pred_eq,
@@ -86,7 +86,7 @@ bool (*const predicate_functions[num_predicates])(const uint64_t, const uint64_t
 	_pred_bc
 };
 
-bool (*get_pred(enum predicates pred))(const uint64_t, const uint64_t)
+bool (*get_pred(enum predicates pred))(uint64_t const, uint64_t const)
 {
 	return predicate_functions[pred];
 }

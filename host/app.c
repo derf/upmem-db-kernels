@@ -294,8 +294,9 @@ int main(int argc, char **argv)
 
 	printf("[::] NMCDB | n_elements=%d n_dpus=%d n_ranks=%d n_threads=%d n_elements_per_dpu=%d ",
 			p.n_elements, n_dpus, n_ranks, p.n_threads, n_elements_dpu);
-	printf("| latency_alloc_us=%f latency_load_us=%f latency_write_data_us=%f latency_write_command_us=%f latency_kernel_upmem_us=%f latency_kernel_cpu=%f latency_read_result_us=%f latency_read_data_us=w%f\n",
-			time_alloc, time_load, total_write_data, total_write_command, total_upmem, total_cpu, total_read_result, total_read_data);
+	printf("| latency_alloc_us=%f latency_load_us=%f latency_write_data_us=%f latency_write_command_us=%f latency_kernel_upmem_us=%f latency_kernel_cpu=%f latency_read_result_us=%f latency_read_data_us=%f latency_postinit=%f\n",
+			time_alloc, time_load, total_write_data, total_write_command, total_upmem, total_cpu, total_read_result, total_read_data,
+			total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_data);
 
 	return 0;
 }
