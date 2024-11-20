@@ -44,6 +44,7 @@ int main(int argc, char **argv)
 			time = stopTimer();
 			printf("select = %d (%f)\n", count_bits(bitmasks), time);
 		} else if (benchmark_events[i].op == op_insert) {
+			host_realloc(n_elements + benchmark_events[i].argument);
 			startTimer();
 			host_insert(benchmark_events[i].argument);
 			time = stopTimer();
@@ -52,6 +53,7 @@ int main(int argc, char **argv)
 			startTimer();
 			unsigned int count = host_delete(benchmark_events[i].predicate, benchmark_events[i].argument);
 			time = stopTimer();
+			host_realloc(n_elements);
 			printf("delete = %d (%f)\n", count, time);
 		} else if (benchmark_events[i].op == op_update) {
 			startTimer();

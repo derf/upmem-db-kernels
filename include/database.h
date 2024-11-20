@@ -12,6 +12,15 @@ static void create_db()
 	}
 }
 
+static void host_realloc(unsigned int n_elem)
+{
+	database = realloc(database, (n_elem) * sizeof(T));
+	assert(database != NULL);
+
+	bitmasks = realloc(bitmasks, (n_elem) / 32 * sizeof(uint32_t) + sizeof(uint32_t));
+	assert(bitmasks != NULL);
+}
+
 static unsigned int host_count(enum predicates pred, unsigned int pred_arg)
 {
 	unsigned int count = 0;
@@ -28,12 +37,6 @@ static unsigned int host_count(enum predicates pred, unsigned int pred_arg)
 
 static void host_insert(unsigned int n_insert)
 {
-	database = realloc(database, (n_elements + n_insert) * sizeof(T));
-	assert(database != NULL);
-
-	bitmasks = realloc(bitmasks, (n_elements + n_insert) / 32 * sizeof(uint32_t) + sizeof(uint32_t));
-	assert(bitmasks != NULL);
-
 	for (unsigned int i = n_elements; i < n_elements + n_insert; i++) {
 		database[i] = i + 1;
 	}
@@ -66,13 +69,6 @@ static unsigned int host_delete(enum predicates pred, unsigned int pred_arg)
 			database[i-n_delete] = database[i];
 		}
 	}
-
-	database = realloc(database, (n_elements - n_delete) * sizeof(T));
-	assert(database != NULL);
-
-	bitmasks = realloc(bitmasks, (n_elements - n_delete) / 32 * sizeof(uint32_t) + sizeof(uint32_t));
-	assert(bitmasks != NULL);
-
 	n_elements -= n_delete;
 	return n_delete;
 }
