@@ -99,10 +99,15 @@ static void upmem_select(unsigned int n_elements_dpu, enum predicates predicate,
 
 	startTimer();
 	DPU_FOREACH(dpu_set, dpu, i) {
-		DPU_ASSERT(dpu_prepare_xfer(dpu, bitmasks + (n_elements_dpu) * i));
+		DPU_ASSERT(dpu_prepare_xfer(dpu, bitmasks + (n_elements_dpu/32) * i));
 	}
-	DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_FROM_DPU, "DPU_RESULTS", 0, sizeof(dpu_results_t), DPU_XFER_DEFAULT));
+	DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_FROM_DPU, DPU_MRAM_HEAP_POINTER_NAME, 65011712, n_elements_dpu / 32 * sizeof(uint32_t), DPU_XFER_DEFAULT));
 	time_read_result = stopTimer();
+
+	printf("[::] SELECT-UPMEM | n_dpus=%d n_ranks=%d n_elements=%d n_elements_per_dpu=%d ",
+			n_dpus, n_ranks, n_elements, n_elements_dpu);
+	printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f\n",
+			time_write_command, time_run, time_read_result);
 }
 
 static void db_to_upmem()
@@ -152,8 +157,11 @@ static void db_from_upmem()
 }
 
 /*
- * Ensure that each DPU processes a multiple of 32 elements
+ * Ensure that each DPU processes a multiple of 64 elements
  * → there are no partially-used bitmasks for SELECT queries at DPU boundaries
+ *   (multiple of 32 elements)
+ * → all MRAM bitmask accesses are 8-Byte aligned
+ *   (multiple of 64 elements == bitmask size is a multiple of 8 Bytes)
  */
 static void set_n_elements_dpu(unsigned int n_elem)
 {
@@ -163,8 +171,8 @@ static void set_n_elements_dpu(unsigned int n_elem)
 		n_elements_dpu += 1;
 	}
 
-	if (n_elements_dpu % 32) {
-		n_elements_dpu += 32 - (n_elements_dpu % 32);
+	if (n_elements_dpu % 64) {
+		n_elements_dpu += 64 - (n_elements_dpu % 64);
 	}
 
 	n_fill_dpu = n_elements_dpu * n_dpus - n_elem;
@@ -235,13 +243,17 @@ int main(int argc, char **argv)
 		} else if (benchmark_events[i].op == op_select) {
 			db_from_upmem();
 			startTimer();
-			host_select(bitmasks, benchmark_events[i].predicate, benchmark_events[i].argument);
+			upmem_select(n_elements_dpu, benchmark_events[i].predicate, benchmark_events[i].argument);
 			time_run = stopTimer();
 
-			printf("[::] SELECT-CPU | n_elements=%d n_threads=%d ",
-					n_elements, p.n_threads);
-			printf("| latency_kernel_us=%f\n",
-					time_run);
+			if (p.verify) {
+				result_upmem = count_bits(bitmasks);
+				host_select(bitmasks, benchmark_events[i].predicate, benchmark_events[i].argument);
+				result_host = count_bits(bitmasks);
+				printf("count = %d / %d\n", result_host, result_upmem);
+				assert(result_host == result_upmem);
+			}
+
 		} else if (benchmark_events[i].op == op_insert) {
 			db_from_upmem();
 			set_n_elements_dpu(n_elements + benchmark_events[i].argument);
@@ -252,9 +264,9 @@ int main(int argc, char **argv)
 		} else if (benchmark_events[i].op == op_delete) {
 			db_from_upmem();
 			startTimer();
-			unsigned int count = host_delete(benchmark_events[i].predicate, benchmark_events[i].argument);
+			result_host = host_delete(benchmark_events[i].predicate, benchmark_events[i].argument);
 			time_run = stopTimer();
-			printf("delete = %d (%f)\n", count, time_run);
+			printf("delete = %d (%f)\n", result_host, time_run);
 			set_n_elements_dpu(n_elements);
 			host_realloc(n_elements + n_fill_dpu);
 		} else if (benchmark_events[i].op == op_update) {
