@@ -92,11 +92,11 @@ int main_kernel_select()
 
 	T* cache = (T*) mem_alloc(BLOCK_SIZE);
 	uint32_t* bitmask_cache = (uint32_t*) mem_alloc(BLOCK_SIZE / sizeof(T) / 32 * sizeof(uint32_t));
-	memset(bitmask_cache, 0, BLOCK_SIZE / sizeof(T) / 32 * sizeof(uint32_t));
 
 	bool (*_pred_f)(const uint64_t, const uint64_t) = get_pred(DPU_INPUT_ARGUMENTS.predicate);
 
 	for (unsigned int byte_index = base_tasklet; byte_index < input_size_dpu_bytes; byte_index += BLOCK_SIZE * NR_TASKLETS) {
+		memset(bitmask_cache, 0, BLOCK_SIZE / sizeof(T) / 32 * sizeof(uint32_t));
 		mram_read((__mram_ptr void const*)(mram_base_addr + byte_index), cache, BLOCK_SIZE);
 		if (byte_index + (BLOCK_SIZE - 1) >= input_size_dpu_bytes) {
 			for (unsigned int i = 0; byte_index + (i * sizeof(T)) < input_size_dpu_bytes; i++) {
