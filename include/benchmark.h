@@ -34,6 +34,8 @@ struct benchmark_event benchmark_events[] = {
 	{op_count, pred_bc, 0},
 	{op_count, pred_eq, 42753},
 	{op_count, pred_ne, 77277},
+	{op_update, pred_eq, 7777},
+	{op_insert, 0, 325},
 	{op_count, pred_le, 1},
 	{op_count, pred_gt, 767547654},
 	{op_count, pred_bs, 4},

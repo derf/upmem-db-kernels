@@ -241,7 +241,7 @@ int main(int argc, char **argv)
 			}
 
 		} else if (benchmark_events[i].op == op_select) {
-			db_from_upmem();
+			db_to_upmem();
 			startTimer();
 			upmem_select(n_elements_dpu, benchmark_events[i].predicate, benchmark_events[i].argument);
 			time_run = stopTimer();
@@ -256,19 +256,36 @@ int main(int argc, char **argv)
 
 		} else if (benchmark_events[i].op == op_insert) {
 			db_from_upmem();
+
 			set_n_elements_dpu(n_elements + benchmark_events[i].argument);
 			host_realloc(n_elements + benchmark_events[i].argument + n_fill_dpu);
+
 			startTimer();
 			host_insert(benchmark_events[i].argument);
 			time_run = stopTimer();
+			total_cpu += time_run;
+
+			printf("[::] INSERT-CPU | n_elements=%d n_threads=%d ",
+					n_elements, p.n_threads);
+			printf("| latency_kernel_us=%f\n",
+					time_run);
+
 		} else if (benchmark_events[i].op == op_delete) {
 			db_from_upmem();
+
 			startTimer();
 			result_host = host_delete(benchmark_events[i].predicate, benchmark_events[i].argument);
 			time_run = stopTimer();
-			printf("delete = %d (%f)\n", result_host, time_run);
+			total_cpu += time_run;
+
 			set_n_elements_dpu(n_elements);
 			host_realloc(n_elements + n_fill_dpu);
+
+			printf("[::] INSERT-CPU | n_elements=%d n_threads=%d ",
+					n_elements, p.n_threads);
+			printf("| latency_kernel_us=%f\n",
+					time_run);
+
 		} else if (benchmark_events[i].op == op_update) {
 			db_from_upmem();
 
@@ -292,11 +309,12 @@ int main(int argc, char **argv)
 	free(bitmasks);
 	DPU_ASSERT(dpu_free(dpu_set));
 
-	printf("[::] NMCDB | n_elements=%d n_dpus=%d n_ranks=%d n_threads=%d n_elements_per_dpu=%d ",
+	printf("[::] NMCDB-UPMEM | n_elements=%d n_dpus=%d n_ranks=%d n_threads=%d n_elements_per_dpu=%d ",
 			p.n_elements, n_dpus, n_ranks, p.n_threads, n_elements_dpu);
-	printf("| latency_alloc_us=%f latency_load_us=%f latency_write_data_us=%f latency_write_command_us=%f latency_kernel_upmem_us=%f latency_kernel_cpu=%f latency_read_result_us=%f latency_read_data_us=%f latency_postinit=%f\n",
+	printf("| latency_alloc_us=%f latency_load_us=%f latency_write_data_us=%f latency_write_command_us=%f latency_kernel_upmem_us=%f latency_kernel_cpu=%f latency_read_result_us=%f latency_read_data_us=%f latency_post_setup_us=%f latency_total_us=%f\n",
 			time_alloc, time_load, total_write_data, total_write_command, total_upmem, total_cpu, total_read_result, total_read_data,
-			total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_data);
+			total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_data,
+			time_alloc + time_load + total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_data);
 
 	return 0;
 }
