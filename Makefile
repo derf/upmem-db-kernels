@@ -24,16 +24,16 @@ endif
 
 all: bin/cpu_code bin/host_code bin/dpu_code
 
-bin:
+bin/cpu_code: ${CPU_SOURCES} ${INCLUDES}
 	${QUIET}mkdir -p bin
-
-bin/cpu_code: bin ${CPU_SOURCES} ${INCLUDES}
 	${QUIET}${CC} ${CPU_CFLAGS} -o $@ ${CPU_SOURCES}
 
-bin/host_code: bin ${HOST_SOURCES} ${INCLUDES}
+bin/host_code: ${HOST_SOURCES} ${INCLUDES}
+	${QUIET}mkdir -p bin
 	${QUIET}${CC} ${HOST_CFLAGS} -o $@ ${HOST_SOURCES}
 
-bin/dpu_code: bin ${DPU_SOURCES} ${INCLUDES}
+bin/dpu_code: ${DPU_SOURCES} ${INCLUDES}
+	${QUIET}mkdir -p bin
 	${QUIET}dpu-upmem-dpurte-clang ${DPU_CFLAGS} -o $@ ${DPU_SOURCES}
 
 clean:
