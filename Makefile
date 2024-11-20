@@ -3,7 +3,7 @@ BL ?= 10
 
 CFLAGS := -Wall -Wextra -pedantic -Iinclude
 CPU_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native -fopenmp
-HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
+HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native -fopenmp $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
 DPU_CFLAGS := ${CFLAGS} -O2 -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
 
 INCLUDES := $(wildcard include/*.h)
