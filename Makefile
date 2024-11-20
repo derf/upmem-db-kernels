@@ -2,7 +2,7 @@ NR_TASKLETS ?= 16
 BL ?= 10
 
 CFLAGS := -Wall -Wextra -pedantic -Iinclude
-CPU_FLAGS := ${CFLAGS} -std=c11 -O3 -march=native -fopenmp
+CPU_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native -fopenmp
 HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
 DPU_CFLAGS := ${CFLAGS} -O2 -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
 
@@ -17,13 +17,18 @@ ifdef verbose
 	QUIET =
 endif
 
+ifdef tinos
+	CPU_CFLAGS += -I/usr/lib/llvm-12/lib/clang/12.0.1/include -L/usr/lib/llvm-12/lib/
+	HOST_CFLAGS += -I/usr/lib/llvm-12/lib/clang/12.0.1/include -L/usr/lib/llvm-12/lib/
+endif
+
 all: bin/cpu_code bin/host_code bin/dpu_code
 
 bin:
 	${QUIET}mkdir -p bin
 
 bin/cpu_code: bin ${CPU_SOURCES} ${INCLUDES}
-	${QUIET}${CC} ${CPU_FLAGS} -o $@ ${CPU_SOURCES}
+	${QUIET}${CC} ${CPU_CFLAGS} -o $@ ${CPU_SOURCES}
 
 bin/host_code: bin ${HOST_SOURCES} ${INCLUDES}
 	${QUIET}${CC} ${HOST_CFLAGS} -o $@ ${HOST_SOURCES}
