@@ -157,11 +157,11 @@ int main(int argc, char **argv)
 	db_to_upmem(n_elements_dpu);
 	time_write_data = stopTimer();
 
-	for (unsigned int i = 0; i < sizeof(benchmark_ops) / sizeof(struct benchmark_op); i++) {
-		result_upmem = upmem_count(n_elements_dpu, benchmark_ops[i].predicate, benchmark_ops[i].argument);
+	for (unsigned int i = 0; i < sizeof(benchmark_events) / sizeof(struct benchmark_event); i++) {
+		result_upmem = upmem_count(n_elements_dpu, benchmark_events[i].predicate, benchmark_events[i].argument);
 		printf("latency_alloc_us=%f\n latency_load=%f latency_write_data=%f latency_write_command=%f latency_kernel=%f latency_read_result=%f latency_read_data=%f", time_alloc, time_load, time_write_data, time_write_command, time_run, time_read_result, 0);
 		if (p.verify) {
-			result_host = host_count(database, p.n_elements, benchmark_ops[i].predicate, benchmark_ops[i].argument);
+			result_host = host_count(database, p.n_elements, benchmark_events[i].predicate, benchmark_events[i].argument);
 			printf("count = %d / %d\n", result_host, result_upmem);
 			assert(result_host == result_upmem);
 		}
