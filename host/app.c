@@ -216,7 +216,7 @@ int main(int argc, char **argv)
 	database = malloc((p.n_elements + n_fill_dpu) * sizeof(T));
 	assert(database != NULL);
 
-	bitmasks = malloc(n_elements / 32 * sizeof(uint32_t) + sizeof(uint32_t));
+	bitmasks = malloc((n_elements + n_fill_dpu) / 32 * sizeof(uint32_t) + sizeof(uint32_t));
 	assert(bitmasks != NULL);
 
 	input_arguments = malloc(n_dpus * sizeof(dpu_arguments_t));
