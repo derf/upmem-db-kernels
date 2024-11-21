@@ -14,10 +14,10 @@ static void create_db()
 
 static void host_realloc(unsigned int n_elem)
 {
-	database = realloc(database, (n_elem) * sizeof(T));
+	database = realloc(database, n_elem * sizeof(T));
 	assert(database != NULL);
 
-	bitmasks = realloc(bitmasks, (n_elem) / 32 * sizeof(uint32_t) + sizeof(uint32_t));
+	bitmasks = realloc(bitmasks, n_elem / 32 * sizeof(uint32_t) + sizeof(uint32_t));
 	assert(bitmasks != NULL);
 }
 
