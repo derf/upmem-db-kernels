@@ -18,8 +18,8 @@ ifdef verbose
 endif
 
 ifdef tinos
-	CPU_CFLAGS += -I/usr/lib/llvm-12/lib/clang/12.0.1/include -L/usr/lib/llvm-12/lib/
-	HOST_CFLAGS += -I/usr/lib/llvm-12/lib/clang/12.0.1/include -L/usr/lib/llvm-12/lib/
+	CPU_CFLAGS += -I/usr/lib/llvm-12/lib/clang/12.0.1/include -L/usr/lib/llvm-12/lib/ -Wno-gnu-zero-variadic-macro-arguments
+	HOST_CFLAGS += -I/usr/lib/llvm-12/lib/clang/12.0.1/include -L/usr/lib/llvm-12/lib/ -Wno-gnu-zero-variadic-macro-arguments
 endif
 
 all: bin/cpu_code bin/host_code bin/dpu_code
