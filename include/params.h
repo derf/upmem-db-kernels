@@ -6,7 +6,7 @@
 #endif
 
 typedef struct Params {
-	unsigned int   n_elements;
+	unsigned long  n_elements;
 	unsigned int   n_threads;
 	unsigned int   n_ranks;
 	bool           verify;
@@ -31,7 +31,7 @@ void parse_params(int argc, char **argv, struct Params *p) {
 	int opt;
 	while((opt = getopt(argc, argv, "i:n:r:A:B:C:V")) >= 0) {
 		switch(opt) {
-			case 'i': p->n_elements    = atoi(optarg); break;
+			case 'i': p->n_elements    = atol(optarg); break;
 			case 'n': p->n_threads     = atoi(optarg); break;
 			case 'r': p->n_ranks       = atoi(optarg); break;
 			case 'V': p->verify        = true; break;

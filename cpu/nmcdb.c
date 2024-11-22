@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 			time = stopTimer();
 			total_time += time;
 
-			printf("[::] COUNT-CPU | n_elements=%d n_threads=%d ",
+			printf("[::] COUNT-CPU | n_elements=%lu n_threads=%d ",
 					n_elements, p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time);;
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 			time = stopTimer();
 			total_time += time;
 
-			printf("[::] SELECT-CPU | n_elements=%d n_threads=%d ",
+			printf("[::] SELECT-CPU | n_elements=%lu n_threads=%d ",
 					n_elements, p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time);
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 			time = stopTimer();
 			total_time += time;
 
-			printf("[::] INSERT-CPU | n_elements=%d n_threads=%d ",
+			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d ",
 					n_elements, p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time);
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 
 			host_realloc(n_elements);
 
-			printf("[::] DELETE-CPU | n_elements=%d n_threads=%d ",
+			printf("[::] DELETE-CPU | n_elements=%lu n_threads=%d ",
 					n_elements, p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time);
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 			time = stopTimer();
 			total_time += time;
 
-			printf("[::] UPDATE-CPU | n_elements=%d n_threads=%d ",
+			printf("[::] UPDATE-CPU | n_elements=%lu n_threads=%d ",
 					n_elements, p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time);
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 	free(database);
 	free(bitmasks);
 
-	printf("[::] NMCDB-CPU | n_elements=%d n_threads=%d ",
+	printf("[::] NMCDB-CPU | n_elements=%lu n_threads=%d ",
 			p.n_elements, p.n_threads);
 	printf("| latency_kernel_cpu=%f latency_post_setup_us=%f latency_total_us=%f\n",
 			total_time, total_time, total_time);

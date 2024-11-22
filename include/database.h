@@ -3,11 +3,12 @@
 
 static T* database;
 static uint32_t* bitmasks;
-unsigned int n_elements;
+unsigned long n_elements;
 
 static void create_db()
 {
-	for (unsigned int i = 0; i < n_elements; i++) {
+	#pragma omp parallel for
+	for (unsigned long i = 0; i < n_elements; i++) {
 		database[i] = i + 1;
 	}
 }
