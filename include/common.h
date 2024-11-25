@@ -15,7 +15,8 @@
 enum kernels {
 	kernel_count = 0,
 	kernel_select = 1,
-	nr_kernels = 2,
+	kernel_update = 2,
+	nr_kernels = 3,
 };
 
 enum predicates {
@@ -28,6 +29,17 @@ enum predicates {
 	pred_bs = 6,
 	pred_bc = 7,
 	num_predicates = 8,
+};
+
+static char* const predicate_names[] = {
+	"≤",
+	"<",
+	"==",
+	"≥",
+	">",
+	"≠",
+	"bit",
+	"!bit"
 };
 
 typedef struct {

@@ -92,10 +92,12 @@ static void upmem_select(unsigned int n_elements_dpu, enum predicates predicate,
 	}
 	DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_TO_DPU, "DPU_INPUT_ARGUMENTS", 0, sizeof(dpu_arguments_t), DPU_XFER_DEFAULT));
 	time_write_command = stopTimer();
+	total_write_command += time_write_command;
 
 	startTimer();
 	DPU_ASSERT(dpu_launch(dpu_set, DPU_SYNCHRONOUS));
 	time_run = stopTimer();
+	total_upmem += time_run;
 
 	startTimer();
 	DPU_FOREACH(dpu_set, dpu, i) {
@@ -103,6 +105,7 @@ static void upmem_select(unsigned int n_elements_dpu, enum predicates predicate,
 	}
 	DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_FROM_DPU, DPU_MRAM_HEAP_POINTER_NAME, 65011712, n_elements_dpu / 32 * sizeof(uint32_t), DPU_XFER_DEFAULT));
 	time_read_result = stopTimer();
+	total_read_result += time_read_result;
 
 	printf("[::] SELECT-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
 			n_dpus, n_ranks, n_elements, n_elements_dpu);
@@ -163,7 +166,7 @@ static void db_from_upmem()
  * → all MRAM bitmask accesses are 8-Byte aligned
  *   (multiple of 64 elements == bitmask size is a multiple of 8 Bytes)
  */
-static void set_n_elements_dpu(unsigned int n_elem)
+static void set_n_elements_dpu(unsigned long n_elem)
 {
 	n_elements_dpu = n_elem / n_dpus;
 
@@ -183,7 +186,7 @@ static void set_n_elements_dpu(unsigned int n_elem)
 int main(int argc, char **argv)
 {
 	struct Params p;
-	unsigned int result_upmem, result_host;
+	unsigned long result_upmem, result_host;
 
 	parse_params(argc, argv, &p);
 	n_elements = p.n_elements;
@@ -236,7 +239,7 @@ int main(int argc, char **argv)
 
 			if (p.verify) {
 				result_host = host_count(benchmark_events[i].predicate, benchmark_events[i].argument);
-				printf("count = %d / %d\n", result_host, result_upmem);
+				printf("count = %lu / %lu\n", result_host, result_upmem);
 				assert(result_host == result_upmem);
 			}
 
@@ -250,12 +253,12 @@ int main(int argc, char **argv)
 				result_upmem = count_bits(bitmasks);
 				host_select(bitmasks, benchmark_events[i].predicate, benchmark_events[i].argument);
 				result_host = count_bits(bitmasks);
-				printf("count = %d / %d\n", result_host, result_upmem);
+				printf("count = %lu / %lu\n", result_host, result_upmem);
 				assert(result_host == result_upmem);
 			}
 
 		} else if (benchmark_events[i].op == op_insert) {
-			//db_from_upmem();
+			data_on_dpus = false; //db_from_upmem();
 
 			set_n_elements_dpu(n_elements + benchmark_events[i].argument);
 			host_realloc(n_elements + benchmark_events[i].argument + n_fill_dpu);
@@ -271,7 +274,7 @@ int main(int argc, char **argv)
 					time_run);
 
 		} else if (benchmark_events[i].op == op_delete) {
-			//db_from_upmem();
+			data_on_dpus = false; //db_from_upmem();
 
 			startTimer();
 			result_host = host_delete(benchmark_events[i].predicate, benchmark_events[i].argument);
@@ -287,10 +290,10 @@ int main(int argc, char **argv)
 					time_run);
 
 		} else if (benchmark_events[i].op == op_update) {
-			//db_from_upmem();
+			data_on_dpus = false; //db_from_upmem();
 
 			startTimer();
-			host_update(benchmark_events[i].predicate,benchmark_events[i].argument);
+			host_update(bitmasks, benchmark_events[i].argument);
 			time_run = stopTimer();
 			total_cpu += time_run;
 

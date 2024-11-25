@@ -19,6 +19,7 @@ int main(int argc, char **argv)
 	double time;
 	double total_time = 0;
 	struct Params p;
+	unsigned long count;
 
 	parse_params(argc, argv, &p);
 	n_elements = p.n_elements;
@@ -36,9 +37,13 @@ int main(int argc, char **argv)
 	for (unsigned int i = 0; i < sizeof(benchmark_events) / sizeof(struct benchmark_event); i++) {
 		if (benchmark_events[i].op == op_count) {
 			startTimer();
-			host_count(benchmark_events[i].predicate, benchmark_events[i].argument);
+			count = host_count(benchmark_events[i].predicate, benchmark_events[i].argument);
 			time = stopTimer();
 			total_time += time;
+
+			if (p.verify) {
+				printf("count(%s %lu) = %lu\n", predicate_names[benchmark_events[i].predicate], benchmark_events[i].argument, count);
+			}
 
 			printf("[::] COUNT-CPU | n_elements=%lu n_threads=%d ",
 					n_elements, p.n_threads);
@@ -49,6 +54,10 @@ int main(int argc, char **argv)
 			host_select(bitmasks, benchmark_events[i].predicate, benchmark_events[i].argument);
 			time = stopTimer();
 			total_time += time;
+
+			if (p.verify) {
+				printf("select(%s %lu) = %lu\n", predicate_names[benchmark_events[i].predicate], benchmark_events[i].argument, count_bits(bitmasks));
+			}
 
 			printf("[::] SELECT-CPU | n_elements=%lu n_threads=%d ",
 					n_elements, p.n_threads);
@@ -80,9 +89,13 @@ int main(int argc, char **argv)
 					time);
 		} else if (benchmark_events[i].op == op_update) {
 			startTimer();
-			unsigned int count = host_update(benchmark_events[i].predicate,benchmark_events[i].argument);
+			count = host_update(bitmasks, benchmark_events[i].argument);
 			time = stopTimer();
 			total_time += time;
+
+			if (p.verify) {
+				printf("update(%lux → %lu) = %lu\n", count_bits(bitmasks), benchmark_events[i].argument, count);
+			}
 
 			printf("[::] UPDATE-CPU | n_elements=%lu n_threads=%d ",
 					n_elements, p.n_threads);
