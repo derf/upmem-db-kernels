@@ -32,7 +32,7 @@ double total_cpu = 0;
 double total_read_result = 0;
 double total_read_data = 0;
 
-static unsigned int upmem_count(unsigned int n_elements_dpu, enum predicates predicate, uint64_t argument)
+static unsigned long upmem_count(unsigned int n_elements_dpu, enum predicates predicate, uint64_t argument)
 {
 	unsigned int i = 0;
 	startTimer();
@@ -60,7 +60,7 @@ static unsigned int upmem_count(unsigned int n_elements_dpu, enum predicates pre
 		DPU_ASSERT(dpu_prepare_xfer(dpu, &dpu_results[i]));
 	}
 	DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_FROM_DPU, "DPU_RESULTS", 0, sizeof(dpu_results_t), DPU_XFER_DEFAULT));
-	unsigned int result_dpu = 0;
+	unsigned long result_dpu = 0;
 	for (i = 0; i < n_dpus; i++) {
 		//printf("DPU %4d count == %d\n", i, dpu_results[i].count);
 		result_dpu += dpu_results[i].count;
