@@ -16,8 +16,9 @@ uint32_t tasklet_count[NR_TASKLETS];
 
 extern int main_kernel_count(void);
 extern int main_kernel_select(void);
+extern int main_kernel_update(void);
 
-int (*kernels[nr_kernels])(void) = {main_kernel_count, main_kernel_select};
+int (*kernels[nr_kernels])(void) = {main_kernel_count, main_kernel_select, main_kernel_update};
 
 int main(void) {
 	return kernels[DPU_INPUT_ARGUMENTS.kernel]();
@@ -110,6 +111,49 @@ int main_kernel_select()
 			}
 		}
 		mram_write(bitmask_cache, (__mram_ptr void*)(bitmask_base_addr + byte_index / sizeof(T) / 32 * sizeof(uint32_t)), BLOCK_SIZE / sizeof(T) / 32 * sizeof(uint32_t));
+	}
+
+	return 0;
+}
+
+int main_kernel_update()
+{
+	unsigned int tasklet_id = me();
+
+	if (tasklet_id == 0) {
+		mem_reset();
+	}
+
+	uint32_t input_size_dpu_bytes = DPU_INPUT_ARGUMENTS.size;
+	uint64_t predicate_arg = DPU_INPUT_ARGUMENTS.predicate_arg;
+
+	// Address of the current processing block in MRAM
+	uint32_t base_tasklet = tasklet_id << BLOCK_SIZE_LOG2;
+	uint32_t mram_base_addr = (uint32_t)DPU_MRAM_HEAP_POINTER;
+	uint32_t bitmask_base_addr = mram_base_addr + 65011712;
+
+	T* cache = (T*) mem_alloc(BLOCK_SIZE);
+	uint32_t* bitmask_cache = (uint32_t*) mem_alloc(BLOCK_SIZE / sizeof(T) / 32 * sizeof(uint32_t));
+
+	for (unsigned int byte_index = base_tasklet; byte_index < input_size_dpu_bytes; byte_index += BLOCK_SIZE * NR_TASKLETS) {
+		mram_read((__mram_ptr void*)(mram_base_addr + byte_index), cache, BLOCK_SIZE);
+		mram_read((__mram_ptr void*)(bitmask_base_addr + byte_index / sizeof(T) / 32 * sizeof(uint32_t)), bitmask_cache, BLOCK_SIZE / sizeof(T) / 32 * sizeof(uint32_t));
+		if (byte_index + (BLOCK_SIZE - 1) >= input_size_dpu_bytes) {
+			for (unsigned int i = 0; byte_index + (i * sizeof(T)) < input_size_dpu_bytes; i++) {
+				if (bitmask_cache[i/32] & (1<<i)) {
+					cache[i] = predicate_arg;
+				}
+			}
+		} else {
+			for (unsigned int i = 0; i < BLOCK_SIZE / sizeof(T) / 32; i++) {
+				for (unsigned int j = 0; j < 32; j++) {
+					if (bitmask_cache[i] & (1<<j)) {
+						cache[i*32+j] = predicate_arg;
+					}
+				}
+			}
+		}
+		mram_write(cache, (__mram_ptr void*)(mram_base_addr + byte_index), BLOCK_SIZE);
 	}
 
 	return 0;
