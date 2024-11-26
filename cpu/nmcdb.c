@@ -6,7 +6,10 @@
 #include <getopt.h>
 #include <assert.h>
 #include <stdint.h>
+
+#if HAVE_OMP
 #include <omp.h>
+#endif
 
 #include "benchmark.h"
 #include "common.h"
@@ -32,7 +35,9 @@ int main(int argc, char **argv)
 
 	create_db();
 
+#if HAVE_OMP
 	omp_set_num_threads(p.n_threads);
+#endif
 
 	for (unsigned int i = 0; i < sizeof(benchmark_events) / sizeof(struct benchmark_event); i++) {
 		if (benchmark_events[i].op == op_count) {

@@ -7,7 +7,10 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <assert.h>
+
+#if HAVE_OMP
 #include <omp.h>
+#endif
 
 #include "benchmark.h"
 #include "common.h"
@@ -21,6 +24,7 @@ struct dpu_set_t dpu_set, dpu;
 uint32_t n_dpus;
 uint32_t n_ranks;
 bool data_on_dpus = false;
+bool data_on_dpus_changed = false;
 
 unsigned int n_elements_dpu, n_fill_dpu;
 
@@ -285,7 +289,9 @@ int main(int argc, char **argv)
 
 	create_db();
 
+#if HAVE_OMP
 	omp_set_num_threads(p.n_threads);
+#endif
 
 	for (unsigned int i = 0; i < sizeof(benchmark_events) / sizeof(struct benchmark_event); i++) {
 		if (benchmark_events[i].op == op_count) {
