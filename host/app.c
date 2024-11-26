@@ -196,6 +196,7 @@ static void db_to_upmem()
 
 static void db_from_upmem()
 {
+	data_on_dpus = false;
 	if (!data_on_dpus_changed) {
 		return;
 	}
@@ -296,10 +297,7 @@ int main(int argc, char **argv)
 	for (unsigned int i = 0; i < sizeof(benchmark_events) / sizeof(struct benchmark_event); i++) {
 		if (benchmark_events[i].op == op_count) {
 			db_to_upmem();
-			startTimer();
 			result_upmem = upmem_count(n_elements_dpu, benchmark_events[i].predicate, benchmark_events[i].argument);
-			time_run = stopTimer();
-			total_upmem += time_run;
 
 			if (p.verify) {
 				result_host = host_count(benchmark_events[i].predicate, benchmark_events[i].argument);
@@ -309,10 +307,7 @@ int main(int argc, char **argv)
 
 		} else if (benchmark_events[i].op == op_select) {
 			db_to_upmem();
-			startTimer();
 			upmem_select(n_elements_dpu, benchmark_events[i].predicate, benchmark_events[i].argument);
-			time_run = stopTimer();
-			total_upmem += time_run;
 
 			if (p.verify) {
 				result_upmem = count_bits(bitmasks);
@@ -356,10 +351,7 @@ int main(int argc, char **argv)
 
 		} else if (benchmark_events[i].op == op_update) {
 
-			startTimer();
 			upmem_update();
-			time_run = stopTimer();
-			total_upmem += time_run;
 
 			if (p.verify) {
 				host_update(bitmasks, benchmark_events[i].argument);

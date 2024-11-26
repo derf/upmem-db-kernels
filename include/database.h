@@ -13,7 +13,7 @@ static void create_db()
 	}
 }
 
-static void host_realloc(unsigned int n_elem)
+static void host_realloc(unsigned long n_elem)
 {
 	database = realloc(database, n_elem * sizeof(T));
 	assert(database != NULL);
@@ -22,7 +22,7 @@ static void host_realloc(unsigned int n_elem)
 	assert(bitmasks != NULL);
 }
 
-static unsigned long host_count(enum predicates pred, unsigned int pred_arg)
+static unsigned long host_count(enum predicates pred, unsigned long pred_arg)
 {
 	unsigned long count = 0;
 	bool (*_pred_f)(uint64_t const, uint64_t const) = get_pred(pred);
@@ -36,7 +36,7 @@ static unsigned long host_count(enum predicates pred, unsigned int pred_arg)
 	return count;
 }
 
-static void host_insert(unsigned int n_insert)
+static void host_insert(unsigned long n_insert)
 {
 	for (unsigned long i = n_elements; i < n_elements + n_insert; i++) {
 		database[i] = i + 1;
@@ -67,7 +67,7 @@ static unsigned long host_update(uint32_t* in, uint64_t value)
 	return count;
 }
 
-static unsigned long host_delete(enum predicates pred, unsigned int pred_arg)
+static unsigned long host_delete(enum predicates pred, unsigned long pred_arg)
 {
 	bool (*_pred_f)(uint64_t const, uint64_t const) = get_pred(pred);
 	unsigned long n_delete = 0;
