@@ -134,6 +134,8 @@ int main_kernel_update()
 
 	T* cache = (T*) mem_alloc(BLOCK_SIZE);
 	uint32_t* bitmask_cache = (uint32_t*) mem_alloc(BLOCK_SIZE / sizeof(T) / 32 * sizeof(uint32_t));
+	uint32_t local_count = 0;
+	uint32_t total_count = 0;
 
 	for (unsigned int byte_index = base_tasklet; byte_index < input_size_dpu_bytes; byte_index += BLOCK_SIZE * NR_TASKLETS) {
 		mram_read((__mram_ptr void*)(mram_base_addr + byte_index), cache, BLOCK_SIZE);
@@ -142,6 +144,7 @@ int main_kernel_update()
 			for (unsigned int i = 0; byte_index + (i * sizeof(T)) < input_size_dpu_bytes; i++) {
 				if (bitmask_cache[i/32] & (1<<i)) {
 					cache[i] = predicate_arg;
+					local_count++;
 				}
 			}
 		} else {
@@ -149,11 +152,26 @@ int main_kernel_update()
 				for (unsigned int j = 0; j < 32; j++) {
 					if (bitmask_cache[i] & (1<<j)) {
 						cache[i*32+j] = predicate_arg;
+						local_count++;
 					}
 				}
 			}
 		}
 		mram_write(cache, (__mram_ptr void*)(mram_base_addr + byte_index), BLOCK_SIZE);
+	}
+
+	if (tasklet_id != 0) {
+		handshake_wait_for(tasklet_id - 1);
+		total_count = tasklet_count[tasklet_id];
+	}
+
+	if (tasklet_id < NR_TASKLETS - 1) {
+		tasklet_count[tasklet_id + 1] = total_count + local_count;
+		handshake_notify();
+	}
+
+	if (tasklet_id == NR_TASKLETS - 1) {
+		DPU_RESULTS.count = total_count + local_count;
 	}
 
 	return 0;
