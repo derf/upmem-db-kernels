@@ -28,6 +28,13 @@ bool data_on_dpus_changed = false;
 
 unsigned int n_elements_dpu, n_fill_dpu;
 
+unsigned int n_reads = 0;
+unsigned int n_writes = 0;
+unsigned int n_count = 0;
+unsigned int n_select = 0;
+unsigned int n_update = 0;
+unsigned int n_insert = 0;
+unsigned int n_delete = 0;
 double time_alloc, time_load, time_write_data, time_write_command, time_run, time_read_result, time_read_data;
 double total_write_data = 0;
 double total_write_command = 0;
@@ -192,6 +199,8 @@ static void db_to_upmem()
 			n_dpus, n_ranks, n_elements, n_elements_dpu);
 	printf("| latency_write_data_us=%f\n",
 			time_write_data);
+
+	n_writes += 1;
 }
 
 static void db_from_upmem()
@@ -217,6 +226,8 @@ static void db_from_upmem()
 			n_dpus, n_ranks, n_elements, n_elements_dpu);
 	printf("| latency_read_data_us=%f\n",
 			time_write_data);
+
+	n_reads += 1;
 }
 
 /*
@@ -296,6 +307,7 @@ int main(int argc, char **argv)
 
 	for (unsigned int i = 0; i < sizeof(benchmark_events) / sizeof(struct benchmark_event); i++) {
 		if (benchmark_events[i].op == op_count) {
+			n_count += 1;
 			db_to_upmem();
 			result_upmem = upmem_count(n_elements_dpu, benchmark_events[i].predicate, benchmark_events[i].argument);
 
@@ -306,6 +318,7 @@ int main(int argc, char **argv)
 			}
 
 		} else if (benchmark_events[i].op == op_select) {
+			n_select += 1;
 			db_to_upmem();
 			upmem_select(n_elements_dpu, benchmark_events[i].predicate, benchmark_events[i].argument);
 
@@ -318,6 +331,7 @@ int main(int argc, char **argv)
 			}
 
 		} else if (benchmark_events[i].op == op_insert) {
+			n_insert += 1;
 			db_from_upmem();
 
 			set_n_elements_dpu(n_elements + benchmark_events[i].argument);
@@ -334,6 +348,7 @@ int main(int argc, char **argv)
 					time_run);
 
 		} else if (benchmark_events[i].op == op_delete) {
+			n_delete += 1;
 			db_from_upmem();
 
 			startTimer();
@@ -350,7 +365,7 @@ int main(int argc, char **argv)
 					time_run);
 
 		} else if (benchmark_events[i].op == op_update) {
-
+			n_update += 1;
 			upmem_update();
 
 			if (p.verify) {
@@ -370,8 +385,8 @@ int main(int argc, char **argv)
 	free(bitmasks);
 	DPU_ASSERT(dpu_free(dpu_set));
 
-	printf("[::] NMCDB-UPMEM | n_elements=%lu n_dpus=%d n_ranks=%d n_threads=%d n_elements_per_dpu=%d ",
-			p.n_elements, n_dpus, n_ranks, p.n_threads, n_elements_dpu);
+	printf("[::] NMCDB-UPMEM | n_elements=%lu n_dpus=%d n_ranks=%d n_threads=%d n_elements_per_dpu=%d n_writes=%d n_reads=%d n_count=%d n_select=%d n_update=%d n_insert=%d n_delete=%d ",
+			p.n_elements, n_dpus, n_ranks, p.n_threads, n_elements_dpu, n_writes, n_reads, n_count, n_select, n_update, n_insert, n_delete);
 	printf("| latency_alloc_us=%f latency_load_us=%f latency_write_data_us=%f latency_write_command_us=%f latency_kernel_upmem_us=%f latency_kernel_cpu=%f latency_read_result_us=%f latency_read_data_us=%f latency_post_setup_us=%f latency_total_us=%f\n",
 			time_alloc, time_load, total_write_data, total_write_command, total_upmem, total_cpu, total_read_result, total_read_data,
 			total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_data,
