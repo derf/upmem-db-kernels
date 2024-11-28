@@ -37,6 +37,8 @@ int main(int argc, char **argv)
 
 #if HAVE_OMP
 	omp_set_num_threads(p.n_threads);
+#else
+	p.n_threads = 1;
 #endif
 
 	for (unsigned int i = 0; i < sizeof(benchmark_events) / sizeof(struct benchmark_event); i++) {
