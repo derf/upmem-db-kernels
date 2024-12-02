@@ -389,10 +389,10 @@ int main(int argc, char **argv)
 
 	printf("[::] NMCDB-UPMEM | n_elements=%lu n_dpus=%d n_ranks=%d n_threads=%d n_elements_per_dpu=%d n_writes=%d n_reads=%d n_count=%d n_select=%d n_update=%d n_insert=%d n_delete=%d ",
 			p.n_elements, n_dpus, n_ranks, p.n_threads, n_elements_dpu, n_writes, n_reads, n_count, n_select, n_update, n_insert, n_delete);
-	printf("| latency_alloc_us=%f latency_load_us=%f latency_write_data_us=%f latency_write_command_us=%f latency_kernel_upmem_us=%f latency_kernel_cpu=%f latency_read_result_us=%f latency_read_data_us=%f latency_post_setup_us=%f latency_total_us=%f\n",
+	printf("| latency_alloc_us=%f latency_load_us=%f latency_write_data_us=%f latency_write_command_us=%f latency_kernel_upmem_us=%f latency_kernel_cpu_us=%f latency_read_result_us=%f latency_read_data_us=%f latency_post_setup_us=%f latency_total_us=%f\n",
 			time_alloc, time_load, total_write_data, total_write_command, total_upmem, total_cpu, total_read_result, total_read_data,
-			total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_data,
-			time_alloc + time_load + total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_data);
+			total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_result,
+			time_alloc + time_load + total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_result);
 
 	return 0;
 }
