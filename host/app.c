@@ -252,6 +252,7 @@ static void set_n_elements_dpu(unsigned long n_elem)
 	n_fill_dpu = n_elements_dpu * n_dpus - n_elem;
 
 	printf("Using %d elements per DPU (filling DPU %d with %d non-elements)\n", n_elements_dpu, n_dpus -1, n_fill_dpu);
+	assert(n_fill_dpu < n_elements_dpu);
 }
 
 int main(int argc, char **argv)
