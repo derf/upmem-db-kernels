@@ -30,7 +30,7 @@ def main():
     consecutive_count = 0
     for i in range(args.n_operations):
         if consecutive_count == args.n_consecutive:
-            print("{op_insert, 0, 1},")
+            print("{op_insert, (predicates)0, 1},")
             consecutive_count = 0
         else:
             print(make_read_op())
