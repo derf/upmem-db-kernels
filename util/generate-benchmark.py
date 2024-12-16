@@ -4,8 +4,9 @@ import argparse
 import random
 
 
-def make_read_op():
-    op = random.choice("count select".split())
+def make_read_op(op=None):
+    if not op:
+        op = random.choice("count select".split())
     pred = random.choice("lt le eq ne ge gt bs bc".split())
 
     if pred in ("bs", "bc"):
@@ -20,6 +21,7 @@ def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__
     )
+    parser.add_argument("--operation", type=str)
     parser.add_argument("--n-operations", type=int, default=200)
     parser.add_argument("--n-consecutive", type=int, default=200)
     parser.add_argument("--with-writes", action="store_true")
@@ -33,7 +35,7 @@ def main():
             print("{op_insert, (predicates)0, 1},")
             consecutive_count = 0
         else:
-            print(make_read_op())
+            print(make_read_op(args.operation))
             consecutive_count += 1
 
     print("};")
