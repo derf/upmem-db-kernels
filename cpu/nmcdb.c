@@ -17,6 +17,9 @@
 #include "params.h"
 #include "timer.h"
 
+unsigned int n_count = 0;
+unsigned int n_select = 0;
+
 int main(int argc, char **argv)
 {
 	double time;
@@ -43,6 +46,7 @@ int main(int argc, char **argv)
 
 	for (unsigned int i = 0; i < sizeof(benchmark_events) / sizeof(struct benchmark_event); i++) {
 		if (benchmark_events[i].op == op_count) {
+			n_count += 1;
 			startTimer();
 			count = host_count(benchmark_events[i].predicate, benchmark_events[i].argument);
 			time = stopTimer();
@@ -52,11 +56,12 @@ int main(int argc, char **argv)
 				printf("count(%s %lu) = %lu\n", predicate_names[benchmark_events[i].predicate], benchmark_events[i].argument, count);
 			}
 
-			printf("[::] COUNT-CPU | n_elements=%lu n_threads=%d ",
-					n_elements, p.n_threads);
+			printf("[::] COUNT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+					n_elements, p.n_threads, n_elements / p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time);;
 		} else if (benchmark_events[i].op == op_select) {
+			n_select += 1;
 			startTimer();
 			host_select(bitmasks, benchmark_events[i].predicate, benchmark_events[i].argument);
 			time = stopTimer();
@@ -66,8 +71,8 @@ int main(int argc, char **argv)
 				printf("select(%s %lu) = %lu\n", predicate_names[benchmark_events[i].predicate], benchmark_events[i].argument, count_bits(bitmasks));
 			}
 
-			printf("[::] SELECT-CPU | n_elements=%lu n_threads=%d ",
-					n_elements, p.n_threads);
+			printf("[::] SELECT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+					n_elements, p.n_threads, n_elements / p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time);
 		} else if (benchmark_events[i].op == op_insert) {
@@ -78,8 +83,8 @@ int main(int argc, char **argv)
 			time = stopTimer();
 			total_time += time;
 
-			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d ",
-					n_elements, p.n_threads);
+			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+					n_elements, p.n_threads, n_elements / p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time);
 		} else if (benchmark_events[i].op == op_delete) {
@@ -90,8 +95,8 @@ int main(int argc, char **argv)
 
 			host_realloc(n_elements);
 
-			printf("[::] DELETE-CPU | n_elements=%lu n_threads=%d ",
-					n_elements, p.n_threads);
+			printf("[::] DELETE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+					n_elements, p.n_threads, n_elements / p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time);
 		} else if (benchmark_events[i].op == op_update) {
@@ -104,8 +109,8 @@ int main(int argc, char **argv)
 				printf("update(%lux → %lu) = %lu\n", count_bits(bitmasks), benchmark_events[i].argument, count);
 			}
 
-			printf("[::] UPDATE-CPU | n_elements=%lu n_threads=%d ",
-					n_elements, p.n_threads);
+			printf("[::] UPDATE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+					n_elements, p.n_threads, n_elements / p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time);
 		} else {
@@ -116,8 +121,8 @@ int main(int argc, char **argv)
 	free(database);
 	free(bitmasks);
 
-	printf("[::] NMCDB-CPU | n_elements=%lu n_threads=%d ",
-			p.n_elements, p.n_threads);
+	printf("[::] NMCDB-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu n_count=%d n_select=%d ",
+			p.n_elements, p.n_threads, p.n_elements / p.n_threads, n_count, n_select);
 	printf("| latency_kernel_cpu=%f latency_post_setup_us=%f latency_total_us=%f\n",
 			total_time, total_time, total_time);
 

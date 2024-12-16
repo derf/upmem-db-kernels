@@ -345,8 +345,8 @@ int main(int argc, char **argv)
 			time_run = stopTimer();
 			total_cpu += time_run;
 
-			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d ",
-					n_elements, p.n_threads);
+			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+					n_elements, p.n_threads, n_elements / p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time_run);
 
@@ -362,8 +362,8 @@ int main(int argc, char **argv)
 			set_n_elements_dpu(n_elements);
 			host_realloc(n_elements + n_fill_dpu);
 
-			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d ",
-					n_elements, p.n_threads);
+			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+					n_elements, p.n_threads, n_elements / p.n_threads);
 			printf("| latency_kernel_us=%f\n",
 					time_run);
 
