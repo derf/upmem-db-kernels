@@ -18,8 +18,8 @@ ifdef verbose
 endif
 
 ifndef chios
-	CPU_CFLAGS += -fopenmp -DHAVE_OMP
-	HOST_CFLAGS += -fopenmp -DHAVE_OMP
+	CPU_CFLAGS += -fopenmp -DHAVE_OMP=1
+	HOST_CFLAGS += -fopenmp -DHAVE_OMP=1
 endif
 
 ifdef tinos
