@@ -11,8 +11,7 @@ typedef struct Params {
 	unsigned int   n_ranks;
 	bool           verify;
 #if NUMA
-	struct bitmask* bitmask_in;
-	struct bitmask* bitmask_out;
+	struct bitmask* bitmask_data;
 	int numa_node_cpu;
 #endif
 }Params;
@@ -23,8 +22,7 @@ void parse_params(int argc, char **argv, struct Params *p) {
 	p->n_threads     = 4;
 	p->verify        = false;
 #if NUMA
-	p->bitmask_in     = NULL;
-	p->bitmask_out    = NULL;
+	p->bitmask_data   = NULL;
 	p->numa_node_cpu = -1;
 #endif
 
@@ -36,9 +34,8 @@ void parse_params(int argc, char **argv, struct Params *p) {
 			case 'r': p->n_ranks       = atoi(optarg); break;
 			case 'V': p->verify        = true; break;
 #if NUMA
-			case 'A': p->bitmask_in    = numa_parse_nodestring(optarg); break;
-			case 'B': p->bitmask_out   = numa_parse_nodestring(optarg); break;
 			case 'C': p->numa_node_cpu = atoi(optarg); break;
+			case 'D': p->bitmask_data  = numa_parse_nodestring(optarg); break;
 #endif
 			default:
 				fprintf(stderr, "\nUnrecognized option!\n");
