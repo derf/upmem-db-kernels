@@ -12,7 +12,7 @@ for n_operations in $(seq 1 5); do
 		util/generate-benchmark.py --operation=${operation} --n-operations=${n_operations} > include/benchmark_events.h
 		make -B tinos=1
 
-		for n_elements in $((2**25)) $((2**26)) $((2**27)) $((2**28)) $((2**29)); do
+		for n_elements in $((2**24)) $((2**25)) $((2**26)) $((2**27)) $((2**28)) $((2**29)) $((2**30)); do
 			for i in $(seq 1 5); do
 				numactl -m 1 -C 8-15 bin/cpu_code -i ${n_elements} -n 1 >> log/$(hostname)/validation.txt || true
 			done
