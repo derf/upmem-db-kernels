@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 		} else if (benchmark_events[i].op == op_select) {
 			n_select += 1;
 			startTimer();
-			host_select(bitmasks, benchmark_events[i].predicate, benchmark_events[i].argument);
+			host_select(benchmark_events[i].predicate, benchmark_events[i].argument);
 			time = stopTimer();
 			total_time += time;
 

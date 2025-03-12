@@ -82,7 +82,7 @@ static unsigned long host_delete(enum predicates pred, unsigned long pred_arg)
 	return n_delete;
 }
 
-static void host_select(uint32_t* out, enum predicates pred, unsigned int pred_arg)
+static void host_select(enum predicates pred, unsigned long pred_arg)
 {
 	bool (*_pred_f)(uint64_t const, uint64_t const) = get_pred(pred);
 	memset(bitmasks, 0, n_elements * sizeof(uint32_t) / 32 + sizeof(uint32_t));
@@ -90,12 +90,12 @@ static void host_select(uint32_t* out, enum predicates pred, unsigned int pred_a
 	#pragma omp parallel for
 	for (unsigned long i = 0; i < n_elements/32; i++) {
 		for (unsigned int j = 0; j < 32; j++) {
-			out[i] |= (_pred_f(database[i*32+j], pred_arg) * 1) << j;
+			bitmasks[i] |= (_pred_f(database[i*32+j], pred_arg) * 1) << j;
 		}
 	}
 
 	for (unsigned int j = 0; j < n_elements % 32; j++) {
-		out[n_elements/32] |= (_pred_f(database[(n_elements/32)*32 + j], pred_arg) * 1) << j;
+		bitmasks[n_elements/32] |= (_pred_f(database[(n_elements/32)*32 + j], pred_arg) * 1) << j;
 	}
 }
 
