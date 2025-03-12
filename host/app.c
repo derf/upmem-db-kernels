@@ -317,7 +317,7 @@ int main(int argc, char **argv)
 
 			if (p.verify) {
 				result_host = host_count(benchmark_events[i].predicate, benchmark_events[i].argument);
-				printf("count = %lu / %lu\n", result_host, result_upmem);
+				printf("count: host %lu =?= %lu upmem (%d %lu)\n", result_host, result_upmem, benchmark_events[i].predicate, benchmark_events[i].argument);
 				assert(result_host == result_upmem);
 			}
 
@@ -328,9 +328,9 @@ int main(int argc, char **argv)
 
 			if (p.verify) {
 				result_upmem = count_bits(bitmasks);
-				host_select(bitmasks, benchmark_events[i].predicate, benchmark_events[i].argument);
+				host_select(benchmark_events[i].predicate, benchmark_events[i].argument);
 				result_host = count_bits(bitmasks);
-				printf("count = %lu / %lu\n", result_host, result_upmem);
+				printf("select: host %lu =?= %lu upmem (%d %lu)\n", result_host, result_upmem, benchmark_events[i].predicate, benchmark_events[i].argument);
 				assert(result_host == result_upmem);
 			}
 
@@ -376,7 +376,7 @@ int main(int argc, char **argv)
 				host_update(bitmasks, benchmark_events[i].argument);
 				result_upmem = upmem_count(n_elements_dpu, pred_eq, benchmark_events[i].argument);
 				result_host = host_count(pred_eq, benchmark_events[i].argument);
-				printf("updated count = %lu / %lu\n", result_host, result_upmem);
+				printf("update: host %lu =?= %lu upmem (%lu)\n", result_host, result_upmem, benchmark_events[i].argument);
 				assert(result_host == result_upmem);
 			}
 		} else {
