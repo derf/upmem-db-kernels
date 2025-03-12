@@ -384,6 +384,7 @@ int main(int argc, char **argv)
 		}
 	}
 
+	db_from_upmem();
 
 	free(database);
 	free(bitmasks);
