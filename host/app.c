@@ -317,7 +317,7 @@ int main(int argc, char **argv)
 
 			if (p.verify) {
 				result_host = host_count(benchmark_events[i].predicate, benchmark_events[i].argument);
-				printf("count: host %lu =?= %lu upmem (%d %lu)\n", result_host, result_upmem, benchmark_events[i].predicate, benchmark_events[i].argument);
+				printf("count: host %lu =?= %lu upmem (%s %lu)\n", result_host, result_upmem, predicate_names[benchmark_events[i].predicate], benchmark_events[i].argument);
 				assert(result_host == result_upmem);
 			}
 
@@ -330,7 +330,7 @@ int main(int argc, char **argv)
 				result_upmem = count_bits(bitmasks);
 				host_select(benchmark_events[i].predicate, benchmark_events[i].argument);
 				result_host = count_bits(bitmasks);
-				printf("select: host %lu =?= %lu upmem (%d %lu)\n", result_host, result_upmem, benchmark_events[i].predicate, benchmark_events[i].argument);
+				printf("select: host %lu =?= %lu upmem (%s %lu)\n", result_host, result_upmem, predicate_names[benchmark_events[i].predicate], benchmark_events[i].argument);
 				assert(result_host == result_upmem);
 			}
 
