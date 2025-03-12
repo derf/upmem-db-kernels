@@ -124,13 +124,14 @@ static void upmem_select(unsigned int n_elements_dpu, enum predicates predicate,
 			time_write_command, time_run, time_read_result);
 }
 
-static unsigned int upmem_update()
+static unsigned int upmem_update(uint64_t argument)
 {
 	unsigned int i = 0;
 	startTimer();
 	DPU_FOREACH(dpu_set, dpu, i) {
 		input_arguments[i].size = n_elements_dpu * sizeof(T);
 		input_arguments[i].kernel = kernel_update;
+		input_arguments[i].predicate_arg = argument;
 		if (i == n_dpus - 1) {
 			input_arguments[i].size -= n_fill_dpu * sizeof(T);
 		}
@@ -369,7 +370,7 @@ int main(int argc, char **argv)
 
 		} else if (benchmark_events[i].op == op_update) {
 			n_update += 1;
-			upmem_update();
+			upmem_update(benchmark_events[i].argument);
 
 			if (p.verify) {
 				host_update(bitmasks, benchmark_events[i].argument);
