@@ -17,6 +17,15 @@ def make_read_op(op=None):
     return "{op_" + op + ", pred_" + pred + ", " + str(pred_arg) + "},"
 
 
+def make_write_op(op=None):
+    if not op:
+        op = random.choice("update".split())
+
+    if op == "update":
+        pred_arg = int(random.random() * 2**34)
+        return "{op_" + op + ", 0, " + str(pred_arg) + "},"
+
+
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__
@@ -30,12 +39,20 @@ def main():
     print("struct benchmark_event benchmark_events[] = {")
 
     consecutive_count = 0
+    have_valid_bitmask = False
     for i in range(args.n_operations):
         if consecutive_count == args.n_consecutive:
-            print("{op_insert, (predicates)0, 1},")
+            print("{op_insert, 0, 1},")
             consecutive_count = 0
+            have_valid_bitmask = False
         else:
-            print(make_read_op(args.operation))
+            if args.with_writes and have_valid_bitmask and random.random() < 0.33:
+                print(make_write_op())
+            else:
+                line = make_read_op(args.operation)
+                if "select" in line:
+                    have_valid_bitmask = True
+                print(line)
             consecutive_count += 1
 
     print("};")
