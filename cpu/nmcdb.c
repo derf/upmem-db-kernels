@@ -58,8 +58,8 @@ int main(int argc, char **argv)
 
 			printf("[::] COUNT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
-			printf("| latency_kernel_us=%f\n",
-					time);;
+			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
+					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_select) {
 			n_select += 1;
 			startTimer();
@@ -73,8 +73,8 @@ int main(int argc, char **argv)
 
 			printf("[::] SELECT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
-			printf("| latency_kernel_us=%f\n",
-					time);
+			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
+					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_insert) {
 			host_realloc(n_elements + benchmark_events[i].argument);
 
@@ -85,8 +85,8 @@ int main(int argc, char **argv)
 
 			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
-			printf("| latency_kernel_us=%f\n",
-					time);
+			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
+					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_delete) {
 			startTimer();
 			host_delete(benchmark_events[i].predicate, benchmark_events[i].argument);
@@ -97,8 +97,8 @@ int main(int argc, char **argv)
 
 			printf("[::] DELETE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
-			printf("| latency_kernel_us=%f\n",
-					time);
+			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
+					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_update) {
 			startTimer();
 			count = host_update(bitmasks, benchmark_events[i].argument);
@@ -111,8 +111,8 @@ int main(int argc, char **argv)
 
 			printf("[::] UPDATE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
-			printf("| latency_kernel_us=%f\n",
-					time);
+			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
+					time, n_elements / time);
 		} else {
 			printf("UNSUPPORTED BENCHMARK EVENT %d\n", benchmark_events[i].op);
 		}
@@ -123,8 +123,8 @@ int main(int argc, char **argv)
 
 	printf("[::] NMCDB-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu n_count=%d n_select=%d ",
 			p.n_elements, p.n_threads, p.n_elements / p.n_threads, n_count, n_select);
-	printf("| latency_kernel_cpu=%f latency_post_setup_us=%f latency_total_us=%f\n",
-			total_time, total_time, total_time);
+	printf("| latency_kernel_cpu=%f latency_post_setup_us=%f latency_total_us=%f throughput_kernel_rps=%f\n",
+			total_time, total_time, total_time, n_elements / total_time);
 
 	return 0;
 }

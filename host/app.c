@@ -81,8 +81,8 @@ static unsigned long upmem_count(unsigned int n_elements_dpu, enum predicates pr
 
 	printf("[::] COUNT-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
 			n_dpus, n_ranks, n_elements, n_elements_dpu);
-	printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f\n",
-			time_write_command, time_run, time_read_result);
+	printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f throughput_kernel_rps=%f\n",
+			time_write_command, time_run, time_read_result, n_elements_dpu / time_run);
 
 	return result_dpu;
 }
@@ -120,8 +120,8 @@ static void upmem_select(unsigned int n_elements_dpu, enum predicates predicate,
 
 	printf("[::] SELECT-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
 			n_dpus, n_ranks, n_elements, n_elements_dpu);
-	printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f\n",
-			time_write_command, time_run, time_read_result);
+	printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f throughput_kernel_rps=%f\n",
+			time_write_command, time_run, time_read_result, n_elements / time_run);
 }
 
 static unsigned int upmem_update(uint64_t argument)
@@ -172,8 +172,8 @@ static unsigned int upmem_update(uint64_t argument)
 
 	printf("[::] UPDATE-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
 			n_dpus, n_ranks, n_elements, n_elements_dpu);
-	printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f\n",
-			time_write_command, time_run, time_read_result);
+	printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f throughput_kernel_rps=%f\n",
+			time_write_command, time_run, time_read_result, n_elements / time_run);
 
 	return result_dpu;
 }
