@@ -11,6 +11,17 @@
 #include <omp.h>
 #endif
 
+#if NUMA
+#include <numaif.h>
+#include <numa.h>
+
+void* mp_pages[1];
+int mp_status[1];
+int mp_nodes[1];
+int numa_node_data = -1;
+int numa_node_cpu = -1;
+#endif
+
 #include "benchmark.h"
 #include "common.h"
 #include "database.h"
@@ -38,6 +49,20 @@ int main(int argc, char **argv)
 
 	create_db();
 
+#if NUMA
+	mp_pages[0] = database;
+	if (move_pages(0, 1, mp_pages, NULL, mp_status, 0) == -1) {
+		perror("move_pages(A)");
+	}
+	else if (mp_status[0] < 0) {
+		printf("move_pages error: %d", mp_status[0]);
+	}
+	else {
+		numa_node_data = mp_status[0];
+	}
+	numa_node_cpu = p.numa_node_cpu;
+#endif
+
 #if HAVE_OMP
 	omp_set_num_threads(p.n_threads);
 #else
@@ -58,6 +83,10 @@ int main(int argc, char **argv)
 
 			printf("[::] COUNT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
+#if NUMA
+			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
+#endif
 			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_select) {
@@ -73,6 +102,10 @@ int main(int argc, char **argv)
 
 			printf("[::] SELECT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
+#if NUMA
+			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
+#endif
 			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_insert) {
@@ -85,6 +118,10 @@ int main(int argc, char **argv)
 
 			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
+#if NUMA
+			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
+#endif
 			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_delete) {
@@ -97,6 +134,10 @@ int main(int argc, char **argv)
 
 			printf("[::] DELETE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
+#if NUMA
+			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
+#endif
 			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_update) {
@@ -111,6 +152,10 @@ int main(int argc, char **argv)
 
 			printf("[::] UPDATE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
+#if NUMA
+			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
+#endif
 			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
 					time, n_elements / time);
 		} else {
@@ -123,6 +168,10 @@ int main(int argc, char **argv)
 
 	printf("[::] NMCDB-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu n_count=%d n_select=%d ",
 			p.n_elements, p.n_threads, p.n_elements / p.n_threads, n_count, n_select);
+#if NUMA
+			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
+#endif
 	printf("| latency_kernel_cpu=%f latency_post_setup_us=%f latency_total_us=%f throughput_kernel_rps=%f\n",
 			total_time, total_time, total_time, n_elements / total_time);
 

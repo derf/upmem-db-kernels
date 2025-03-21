@@ -1,15 +1,22 @@
 NR_TASKLETS ?= 16
 BL ?= 10
 
+numa ?= 0
+
+FLAGS :=
 CFLAGS := -Wall -Wextra -pedantic -Iinclude
-CPU_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native
-HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
+CPU_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native -DNUMA=${numa}
+HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL} -DNUMA=${numa}
 DPU_CFLAGS := ${CFLAGS} -O2 -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
 
 INCLUDES := $(wildcard include/*.h)
 CPU_SOURCES := $(wildcard cpu/*.c)
 HOST_SOURCES := $(wildcard host/*.c)
 DPU_SOURCES := $(wildcard dpu/*.c)
+
+ifeq (${numa}, 1)
+	FLAGS += -lnuma
+endif
 
 QUIET = @
 
@@ -31,7 +38,7 @@ all: bin/cpu_code bin/host_code bin/dpu_code
 
 bin/cpu_code: ${CPU_SOURCES} ${INCLUDES}
 	${QUIET}mkdir -p bin
-	${QUIET}${CC} ${CPU_CFLAGS} -o $@ ${CPU_SOURCES}
+	${QUIET}${CC} ${CPU_CFLAGS} -o $@ ${CPU_SOURCES} ${FLAGS}
 
 bin/host_code: ${HOST_SOURCES} ${INCLUDES}
 	${QUIET}mkdir -p bin
