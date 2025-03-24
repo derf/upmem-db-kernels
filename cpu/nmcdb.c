@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
+			printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_select) {
 			n_select += 1;
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
+			printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_insert) {
 			host_realloc(n_elements + benchmark_events[i].argument);
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
+			printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_delete) {
 			startTimer();
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
+			printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_update) {
 			startTimer();
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
 			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-			printf("| latency_kernel_us=%f throughput_kernel_rps=%f\n",
+			printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
 					time, n_elements / time);
 		} else {
 			printf("UNSUPPORTED BENCHMARK EVENT %d\n", benchmark_events[i].op);
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-	printf("| latency_kernel_cpu=%f latency_post_setup_us=%f latency_total_us=%f throughput_kernel_rps=%f\n",
+	printf("| latency_kernel_cpu=%f latency_post_setup_us=%f latency_total_us=%f throughput_kernel_Mrps=%f\n",
 			total_time, total_time, total_time, n_elements / total_time);
 
 	return 0;
