@@ -6,7 +6,7 @@ numa ?= 0
 
 FLAGS :=
 CFLAGS := -Wall -Wextra -pedantic -Iinclude
-CPU_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native -DNUMA=${numa}
+CPU_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native -DNUMA=${numa} -DDFATOOL_TIMING=${dfatool_timing}
 HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL} -DNUMA=${numa} -DDFATOOL_TIMING=${dfatool_timing}
 DPU_CFLAGS := ${CFLAGS} -O2 -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
 
