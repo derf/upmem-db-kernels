@@ -17,8 +17,12 @@ CPU_SOURCES := $(wildcard cpu/*.c)
 HOST_SOURCES := $(wildcard host/*.c)
 DPU_SOURCES := $(wildcard dpu/*.c)
 
+ifeq (${aspectc_timing}, 1)
+	ASPECTC_FLAGS += -a include/dfatool.ah
+endif
+
 ifeq (${aspectc}, 1)
-	CC = ag++ -r repo.acp -v 0 --c_compiler ${UPMEM_HOME}/bin/clang++ -p . --Xcompiler
+	CC = ag++ -r repo.acp -v 0 ${ASPECTC_FLAGS} --c_compiler ${UPMEM_HOME}/bin/clang++ -p . --Xcompiler
 else
 	CPU_FLAGS += -std=c11
 	HOST_FLAGS += -std=c11

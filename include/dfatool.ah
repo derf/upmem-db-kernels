@@ -1,0 +1,73 @@
+#pragma once
+
+#include <sys/time.h>
+
+aspect DfatoolTiming {
+	struct timeval starttime;
+	struct timeval stoptime;
+	uint32_t n_ranks;
+
+	advice call("% dpu_alloc_ranks(...)") : around() {
+		n_ranks = *(tjp->arg<0>());
+		gettimeofday(&starttime, NULL);
+		tjp->proceed();
+		gettimeofday(&stoptime, NULL);
+		printf("[::] dpu_alloc_ranks | n_ranks=%u | latency_us=%f\n",
+			n_ranks,
+			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
+		);
+	}
+
+	advice call("% dpu_load(...)") : around() {
+		gettimeofday(&starttime, NULL);
+		tjp->proceed();
+		gettimeofday(&stoptime, NULL);
+		printf("[::] dpu_load | n_ranks=%u | latency_us=%f\n",
+			n_ranks,
+			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
+		);
+	}
+
+	advice call("% dpu_free(...)") : around() {
+		gettimeofday(&starttime, NULL);
+		tjp->proceed();
+		gettimeofday(&stoptime, NULL);
+		printf("[::] dpu_free | n_ranks=%u | latency_us=%f\n",
+			n_ranks,
+			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
+		);
+	}
+
+	advice call("% dpu_launch(...)") : around() {
+		gettimeofday(&starttime, NULL);
+		tjp->proceed();
+		gettimeofday(&stoptime, NULL);
+		printf("[::] dpu_launch | n_ranks=%u | latency_us=%f\n",
+			n_ranks,
+			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
+		);
+	}
+
+	advice call("% dpu_push_xfer(...)") : around() {
+		size_t payload_size = *(tjp->arg<4>()) * n_ranks;
+		gettimeofday(&starttime, NULL);
+		tjp->proceed();
+		gettimeofday(&stoptime, NULL);
+		double time_us = (stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec);
+		if (*(tjp->arg<1>()) == DPU_XFER_TO_DPU) {
+			printf("[::] dpu_push_to_dpu | n_ranks=%u payload_B=%lu | latency_us=%f throughput_Bps=%f\n",
+				n_ranks, payload_size, time_us, payload_size * 1000000.0 / time_us
+			);
+		} else if (*(tjp->arg<1>()) == DPU_XFER_FROM_DPU) {
+			printf("[::] dpu_push_from_dpu | n_ranks=%u payload_B=%lu | latency_us=%f throughput_Bps=%f\n",
+				n_ranks, payload_size, time_us, payload_size * 1000000.0 / time_us
+			);
+		}
+	}
+};
+
+
+
+
+
+
