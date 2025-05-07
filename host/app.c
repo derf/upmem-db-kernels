@@ -79,9 +79,9 @@ static unsigned long upmem_count(unsigned int n_elements_dpu, enum predicates pr
 	time_read_result = stopTimer();
 	total_read_result += time_read_result;
 
-	printf("[::] COUNT-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
+	dfatool_printf("[::] COUNT-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
 			n_dpus, n_ranks, n_elements, n_elements_dpu);
-	printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f throughput_kernel_rps=%f\n",
+	dfatool_printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f throughput_kernel_rps=%f\n",
 			time_write_command, time_run, time_read_result, n_elements_dpu / time_run);
 
 	return result_dpu;
@@ -118,9 +118,9 @@ static void upmem_select(unsigned int n_elements_dpu, enum predicates predicate,
 	time_read_result = stopTimer();
 	total_read_result += time_read_result;
 
-	printf("[::] SELECT-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
+	dfatool_printf("[::] SELECT-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
 			n_dpus, n_ranks, n_elements, n_elements_dpu);
-	printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f throughput_kernel_rps=%f\n",
+	dfatool_printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f throughput_kernel_rps=%f\n",
 			time_write_command, time_run, time_read_result, n_elements / time_run);
 }
 
@@ -170,9 +170,9 @@ static unsigned int upmem_update(uint64_t argument)
 		data_on_dpus_changed = true;
 	}
 
-	printf("[::] UPDATE-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_update=%lu n_elements_per_dpu=%d ",
+	dfatool_printf("[::] UPDATE-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_update=%lu n_elements_per_dpu=%d ",
 			n_dpus, n_ranks, n_elements, count_bits(bitmasks), n_elements_dpu);
-	printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f throughput_kernel_rps=%f\n",
+	dfatool_printf("| latency_write_command_us=%f latency_kernel_us=%f latency_read_result_us=%f throughput_kernel_rps=%f\n",
 			time_write_command, time_run, time_read_result, n_elements / time_run);
 
 	return result_dpu;
@@ -196,9 +196,9 @@ static void db_to_upmem()
 	time_write_data = stopTimer();
 	total_write_data += time_write_data;
 
-	printf("[::] WRITE-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
+	dfatool_printf("[::] WRITE-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
 			n_dpus, n_ranks, n_elements, n_elements_dpu);
-	printf("| latency_write_data_us=%f\n",
+	dfatool_printf("| latency_write_data_us=%f\n",
 			time_write_data);
 
 	n_writes += 1;
@@ -223,9 +223,9 @@ static void db_from_upmem()
 	time_read_data = stopTimer();
 	total_read_data += time_read_data;
 
-	printf("[::] READ-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
+	dfatool_printf("[::] READ-UPMEM | n_dpus=%d n_ranks=%d n_elements=%lu n_elements_per_dpu=%d ",
 			n_dpus, n_ranks, n_elements, n_elements_dpu);
-	printf("| latency_read_data_us=%f\n",
+	dfatool_printf("| latency_read_data_us=%f\n",
 			time_write_data);
 
 	n_reads += 1;
@@ -346,9 +346,9 @@ int main(int argc, char **argv)
 			time_run = stopTimer();
 			total_cpu += time_run;
 
-			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+			dfatool_printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
-			printf("| latency_kernel_us=%f\n",
+			dfatool_printf("| latency_kernel_us=%f\n",
 					time_run);
 
 		} else if (benchmark_events[i].op == op_delete) {
@@ -363,9 +363,9 @@ int main(int argc, char **argv)
 			set_n_elements_dpu(n_elements);
 			host_realloc(n_elements + n_fill_dpu);
 
-			printf("[::] DELETE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+			dfatool_printf("[::] DELETE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
-			printf("| latency_kernel_us=%f\n",
+			dfatool_printf("| latency_kernel_us=%f\n",
 					time_run);
 
 		} else if (benchmark_events[i].op == op_update) {
@@ -390,9 +390,9 @@ int main(int argc, char **argv)
 	free(bitmasks);
 	DPU_ASSERT(dpu_free(dpu_set));
 
-	printf("[::] NMCDB-UPMEM | n_elements=%lu n_dpus=%d n_ranks=%d n_threads=%d n_elements_per_dpu=%d n_writes=%d n_reads=%d n_count=%d n_select=%d n_update=%d n_insert=%d n_delete=%d ",
+	dfatool_printf("[::] NMCDB-UPMEM | n_elements=%lu n_dpus=%d n_ranks=%d n_threads=%d n_elements_per_dpu=%d n_writes=%d n_reads=%d n_count=%d n_select=%d n_update=%d n_insert=%d n_delete=%d ",
 			p.n_elements, n_dpus, n_ranks, p.n_threads, n_elements_dpu, n_writes, n_reads, n_count, n_select, n_update, n_insert, n_delete);
-	printf("| latency_alloc_us=%f latency_load_us=%f latency_write_data_us=%f latency_write_command_us=%f latency_kernel_upmem_us=%f latency_kernel_cpu_us=%f latency_read_result_us=%f latency_read_data_us=%f latency_post_setup_us=%f latency_total_us=%f\n",
+	dfatool_printf("| latency_alloc_us=%f latency_load_us=%f latency_write_data_us=%f latency_write_command_us=%f latency_kernel_upmem_us=%f latency_kernel_cpu_us=%f latency_read_result_us=%f latency_read_data_us=%f latency_post_setup_us=%f latency_total_us=%f\n",
 			time_alloc, time_load, total_write_data, total_write_command, total_upmem, total_cpu, total_read_result, total_read_data,
 			total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_result,
 			time_alloc + time_load + total_write_data + total_write_command + total_upmem + total_cpu + total_read_data + total_read_result);

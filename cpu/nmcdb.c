@@ -81,13 +81,13 @@ int main(int argc, char **argv)
 				printf("count(%s %lu) = %lu\n", predicate_names[benchmark_events[i].predicate], benchmark_events[i].argument, count);
 			}
 
-			printf("[::] COUNT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+			dfatool_printf("[::] COUNT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
 #if NUMA
-			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+			dfatool_printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-			printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
+			dfatool_printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_select) {
 			n_select += 1;
@@ -100,13 +100,13 @@ int main(int argc, char **argv)
 				printf("select(%s %lu) = %lu\n", predicate_names[benchmark_events[i].predicate], benchmark_events[i].argument, count_bits(bitmasks));
 			}
 
-			printf("[::] SELECT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+			dfatool_printf("[::] SELECT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
 #if NUMA
-			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+			dfatool_printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-			printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
+			dfatool_printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_insert) {
 			host_realloc(n_elements + benchmark_events[i].argument);
@@ -116,13 +116,13 @@ int main(int argc, char **argv)
 			time = stopTimer();
 			total_time += time;
 
-			printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+			dfatool_printf("[::] INSERT-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
 #if NUMA
-			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+			dfatool_printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-			printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
+			dfatool_printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_delete) {
 			startTimer();
@@ -132,13 +132,13 @@ int main(int argc, char **argv)
 
 			host_realloc(n_elements);
 
-			printf("[::] DELETE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
+			dfatool_printf("[::] DELETE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, p.n_threads, n_elements / p.n_threads);
 #if NUMA
-			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+			dfatool_printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-			printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
+			dfatool_printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
 					time, n_elements / time);
 		} else if (benchmark_events[i].op == op_update) {
 			startTimer();
@@ -150,13 +150,13 @@ int main(int argc, char **argv)
 				printf("update(%lux → %lu) = %lu\n", count_bits(bitmasks), benchmark_events[i].argument, count);
 			}
 
-			printf("[::] UPDATE-CPU | n_elements=%lu n_elements_update=%lu n_threads=%d n_elements_per_thread=%lu ",
+			dfatool_printf("[::] UPDATE-CPU | n_elements=%lu n_elements_update=%lu n_threads=%d n_elements_per_thread=%lu ",
 					n_elements, count_bits(bitmasks), p.n_threads, n_elements / p.n_threads);
 #if NUMA
-			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+			dfatool_printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-			printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
+			dfatool_printf("| latency_kernel_us=%f throughput_kernel_Mrps=%f\n",
 					time, n_elements / time);
 		} else {
 			printf("UNSUPPORTED BENCHMARK EVENT %d\n", benchmark_events[i].op);
@@ -166,13 +166,13 @@ int main(int argc, char **argv)
 	free(database);
 	free(bitmasks);
 
-	printf("[::] NMCDB-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu n_count=%d n_select=%d ",
+	dfatool_printf("[::] NMCDB-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu n_count=%d n_select=%d ",
 			p.n_elements, p.n_threads, p.n_elements / p.n_threads, n_count, n_select);
 #if NUMA
-			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
-					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
+	dfatool_printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
+			numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
 #endif
-	printf("| latency_kernel_cpu=%f latency_post_setup_us=%f latency_total_us=%f throughput_kernel_Mrps=%f\n",
+	dfatool_printf("| latency_kernel_cpu=%f latency_post_setup_us=%f latency_total_us=%f throughput_kernel_Mrps=%f\n",
 			total_time, total_time, total_time, n_elements / total_time);
 
 	return 0;

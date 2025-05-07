@@ -1,12 +1,13 @@
 NR_TASKLETS ?= 16
 BL ?= 10
 
+dfatool_timing ?= 1
 numa ?= 0
 
 FLAGS :=
 CFLAGS := -Wall -Wextra -pedantic -Iinclude
 CPU_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native -DNUMA=${numa}
-HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL} -DNUMA=${numa}
+HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL} -DNUMA=${numa} -DDFATOOL_TIMING=${dfatool_timing}
 DPU_CFLAGS := ${CFLAGS} -O2 -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
 
 INCLUDES := $(wildcard include/*.h)
