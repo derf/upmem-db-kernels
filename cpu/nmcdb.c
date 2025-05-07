@@ -150,8 +150,8 @@ int main(int argc, char **argv)
 				printf("update(%lux → %lu) = %lu\n", count_bits(bitmasks), benchmark_events[i].argument, count);
 			}
 
-			printf("[::] UPDATE-CPU | n_elements=%lu n_threads=%d n_elements_per_thread=%lu ",
-					n_elements, p.n_threads, n_elements / p.n_threads);
+			printf("[::] UPDATE-CPU | n_elements=%lu n_elements_update=%lu n_threads=%d n_elements_per_thread=%lu ",
+					n_elements, count_bits(bitmasks), p.n_threads, n_elements / p.n_threads);
 #if NUMA
 			printf("numa_node_data=%d numa_node_cpu=%d numa_distance=%d ",
 					numa_node_data, numa_node_cpu, numa_distance(numa_node_data, numa_node_cpu));
