@@ -8,8 +8,8 @@ verbose ?= 0
 
 FLAGS :=
 CFLAGS := -Wall -Wextra -pedantic -Iinclude
-CPU_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native -DNUMA=${numa} -DDFATOOL_TIMING=${dfatool_timing}
-HOST_CFLAGS := ${CFLAGS} -std=c11 -O3 -march=native $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL} -DNUMA=${numa} -DDFATOOL_TIMING=${dfatool_timing}
+CPU_CFLAGS := ${CFLAGS} -O3 -march=native -DNUMA=${numa} -DDFATOOL_TIMING=${dfatool_timing}
+HOST_CFLAGS := ${CFLAGS} -O3 -march=native $$(dpu-pkg-config --cflags --libs dpu) -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL} -DNUMA=${numa} -DDFATOOL_TIMING=${dfatool_timing} -DASPECTC=${aspectc}
 DPU_CFLAGS := ${CFLAGS} -O2 -DNR_TASKLETS=${NR_TASKLETS} -DBL=${BL}
 
 INCLUDES := $(wildcard include/*.h)
@@ -18,7 +18,10 @@ HOST_SOURCES := $(wildcard host/*.c)
 DPU_SOURCES := $(wildcard dpu/*.c)
 
 ifeq (${aspectc}, 1)
-	CC = ag++ -r repo.acp -v 0 -p . --Xcompiler
+	CC = ag++ -r repo.acp -v 0 --c_compiler ${UPMEM_HOME}/bin/clang++ -p . --Xcompiler
+else
+	CPU_FLAGS += -std=c11
+	HOST_FLAGS += -std=c11
 endif
 
 ifeq (${numa}, 1)

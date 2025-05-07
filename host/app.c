@@ -2,8 +2,18 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+
+#if ASPECTC
+extern "C" {
+#endif
+
 #include <dpu.h>
 #include <dpu_management.h>
+
+#if ASPECTC
+}
+#endif
+
 #include <unistd.h>
 #include <getopt.h>
 #include <assert.h>
