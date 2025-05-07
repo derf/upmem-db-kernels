@@ -19,6 +19,12 @@ enum kernels {
 	nr_kernels = 3,
 };
 
+static char* const kernel_names[] = {
+	(char* const)"count",
+	(char* const)"select",
+	(char* const)"update",
+};
+
 enum predicates {
 	pred_lt = 0,
 	pred_le = 1,

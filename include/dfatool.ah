@@ -42,8 +42,9 @@ aspect DfatoolTiming {
 		gettimeofday(&starttime, NULL);
 		tjp->proceed();
 		gettimeofday(&stoptime, NULL);
-		printf("[::] dpu_launch | n_ranks=%u | latency_us=%f\n",
+		printf("[::] dpu_launch | n_ranks=%u kernel=%s | latency_us=%f\n",
 			n_ranks,
+			kernel_names[input_arguments[0].kernel],
 			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
 		);
 	}
