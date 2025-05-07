@@ -50,18 +50,18 @@ aspect DfatoolTiming {
 	}
 
 	advice call("% dpu_push_xfer(...)") : around() {
-		size_t payload_size = *(tjp->arg<4>()) * n_ranks;
+		size_t payload_size = *(tjp->arg<4>());
 		gettimeofday(&starttime, NULL);
 		tjp->proceed();
 		gettimeofday(&stoptime, NULL);
 		double time_us = (stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec);
 		if (*(tjp->arg<1>()) == DPU_XFER_TO_DPU) {
-			printf("[::] dpu_push_to_dpu | n_ranks=%u payload_B=%lu | latency_us=%f throughput_Bps=%f\n",
-				n_ranks, payload_size, time_us, payload_size * 1000000.0 / time_us
+			printf("[::] dpu_push_to_dpu | n_ranks=%u total_payload_B=%lu dpu_payload_B=%lu | latency_us=%f throughput_Bps=%f\n",
+				n_ranks, payload_size * n_dpus, payload_size, time_us, payload_size * n_dpus * 1000000.0 / time_us
 			);
 		} else if (*(tjp->arg<1>()) == DPU_XFER_FROM_DPU) {
-			printf("[::] dpu_push_from_dpu | n_ranks=%u payload_B=%lu | latency_us=%f throughput_Bps=%f\n",
-				n_ranks, payload_size, time_us, payload_size * 1000000.0 / time_us
+			printf("[::] dpu_push_from_dpu | n_ranks=%u total_payload_B=%lu dpu_payload_B=%lu | latency_us=%f throughput_Bps=%f\n",
+				n_ranks, payload_size * n_dpus, payload_size, time_us, payload_size * n_dpus * 1000000.0 / time_us
 			);
 		}
 	}
