@@ -41,10 +41,10 @@ int main(int argc, char **argv)
 	parse_params(argc, argv, &p);
 	n_elements = p.n_elements;
 
-	database = malloc(n_elements * sizeof(T));
+	database = (T*)malloc(n_elements * sizeof(T));
 	assert(database != NULL);
 
-	bitmasks = malloc(n_elements / 32 * sizeof(uint32_t) + sizeof(uint32_t));
+	bitmasks = (uint32_t*)malloc(n_elements / 32 * sizeof(uint32_t) + sizeof(uint32_t));
 	assert(bitmasks != NULL);
 
 	create_db();

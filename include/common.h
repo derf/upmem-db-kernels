@@ -32,14 +32,14 @@ enum predicates {
 };
 
 static char* const predicate_names[] = {
-	"≤",
-	"<",
-	"==",
-	"≥",
-	">",
-	"≠",
-	"bit",
-	"!bit"
+	(char* const)"≤",
+	(char* const)"<",
+	(char* const)"==",
+	(char* const)"≥",
+	(char* const)">",
+	(char* const)"≠",
+	(char* const)"bit",
+	(char* const)"!bit"
 };
 
 typedef struct {

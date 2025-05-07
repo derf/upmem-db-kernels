@@ -1,8 +1,10 @@
 NR_TASKLETS ?= 16
 BL ?= 10
 
+aspectc ?= 0
 dfatool_timing ?= 1
 numa ?= 0
+verbose ?= 0
 
 FLAGS :=
 CFLAGS := -Wall -Wextra -pedantic -Iinclude
@@ -15,13 +17,17 @@ CPU_SOURCES := $(wildcard cpu/*.c)
 HOST_SOURCES := $(wildcard host/*.c)
 DPU_SOURCES := $(wildcard dpu/*.c)
 
+ifeq (${aspectc}, 1)
+	CC = ag++ -r repo.acp -v 0 -p . --Xcompiler
+endif
+
 ifeq (${numa}, 1)
 	FLAGS += -lnuma
 endif
 
 QUIET = @
 
-ifdef verbose
+ifeq (${verbose}, 1)
 	QUIET =
 endif
 

@@ -23,7 +23,7 @@ def make_write_op(op=None):
 
     if op == "update":
         pred_arg = int(random.random() * 2**34)
-        return "{op_" + op + ", 0, " + str(pred_arg) + "},"
+        return "{op_" + op + ", (enum predicates)0, " + str(pred_arg) + "},"
 
 
 def main():
@@ -42,7 +42,7 @@ def main():
     have_valid_bitmask = False
     for i in range(args.n_operations):
         if consecutive_count == args.n_consecutive:
-            print("{op_insert, 0, 1},")
+            print("{op_insert, (enum predicates)0, 1},")
             consecutive_count = 0
             have_valid_bitmask = False
         else:

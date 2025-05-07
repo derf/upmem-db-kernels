@@ -289,16 +289,16 @@ int main(int argc, char **argv)
 
 	set_n_elements_dpu(n_elements);
 
-	database = malloc((p.n_elements + n_fill_dpu) * sizeof(T));
+	database = (T*)malloc((p.n_elements + n_fill_dpu) * sizeof(T));
 	assert(database != NULL);
 
-	bitmasks = malloc((n_elements + n_fill_dpu) / 32 * sizeof(uint32_t) + sizeof(uint32_t));
+	bitmasks = (uint32_t*)malloc((n_elements + n_fill_dpu) / 32 * sizeof(uint32_t) + sizeof(uint32_t));
 	assert(bitmasks != NULL);
 
-	input_arguments = malloc(n_dpus * sizeof(dpu_arguments_t));
+	input_arguments = (dpu_arguments_t*)malloc(n_dpus * sizeof(dpu_arguments_t));
 	assert(input_arguments != NULL);
 
-	dpu_results = malloc(n_dpus * sizeof(dpu_results_t));
+	dpu_results = (dpu_results_t*)malloc(n_dpus * sizeof(dpu_results_t));
 	assert(dpu_results != NULL);
 
 	create_db();
