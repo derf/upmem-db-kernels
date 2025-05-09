@@ -5,13 +5,24 @@
 aspect DfatoolHostTiming {
 	struct timeval starttime;
 	struct timeval stoptime;
-	uint32_t n_ranks;
+	uint32_t n_ranks = 0;
+	uint32_t n_dpus = 0;
+
+	double const M_to_Mi = 1.048576; /* 2^20 / 1e6 */
+
+	advice call("% dpu_get_nr_dpus(...)") : after() {
+		n_dpus = **(tjp->arg<1>());
+	}
+
+	advice call("% dpu_get_nr_ranks(...)") : after() {
+		n_ranks = **(tjp->arg<1>());
+	}
 
 	advice call("% dpu_alloc_ranks(...)") : around() {
-		n_ranks = *(tjp->arg<0>());
 		gettimeofday(&starttime, NULL);
 		tjp->proceed();
 		gettimeofday(&stoptime, NULL);
+		n_ranks = *(tjp->arg<0>());
 		printf("[::] dpu_alloc_ranks | n_ranks=%u | latency_us=%f\n",
 			n_ranks,
 			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
@@ -22,8 +33,8 @@ aspect DfatoolHostTiming {
 		gettimeofday(&starttime, NULL);
 		tjp->proceed();
 		gettimeofday(&stoptime, NULL);
-		printf("[::] dpu_load | n_ranks=%u | latency_us=%f\n",
-			n_ranks,
+		printf("[::] dpu_load | n_dpus=%u n_ranks=%u | latency_us=%f\n",
+			n_dpus, n_ranks,
 			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
 		);
 	}
@@ -32,8 +43,8 @@ aspect DfatoolHostTiming {
 		gettimeofday(&starttime, NULL);
 		tjp->proceed();
 		gettimeofday(&stoptime, NULL);
-		printf("[::] dpu_free | n_ranks=%u | latency_us=%f\n",
-			n_ranks,
+		printf("[::] dpu_free | n_dpus=%u n_ranks=%u | latency_us=%f\n",
+			n_dpus, n_ranks,
 			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
 		);
 	}
@@ -42,10 +53,14 @@ aspect DfatoolHostTiming {
 		gettimeofday(&starttime, NULL);
 		tjp->proceed();
 		gettimeofday(&stoptime, NULL);
-		printf("[::] dpu_launch | n_ranks=%u kernel=%s | latency_us=%f\n",
-			n_ranks,
+		double latency_us = (stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec);
+		printf("[::] dpu_launch | n_dpus=%u n_ranks=%u e_kernel=%s n_elements=%lu n_elements_per_dpu=%d | latency_us=%f throughput_Mrps=%f throughput_MiBps=%f\n",
+			n_dpus, n_ranks,
 			kernel_names[input_arguments[0].kernel],
-			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
+			n_elements, n_elements_dpu,
+			latency_us,
+			n_elements / latency_us,
+			n_elements * sizeof(T) / (latency_us * M_to_Mi)
 		);
 	}
 
@@ -56,12 +71,18 @@ aspect DfatoolHostTiming {
 		gettimeofday(&stoptime, NULL);
 		double time_us = (stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec);
 		if (*(tjp->arg<1>()) == DPU_XFER_TO_DPU) {
-			printf("[::] dpu_push_to_dpu | n_ranks=%u total_payload_B=%lu dpu_payload_B=%lu | latency_us=%f throughput_Bps=%f\n",
-				n_ranks, payload_size * n_dpus, payload_size, time_us, payload_size * n_dpus * 1000000.0 / time_us
+			printf("[::] dpu_push_to_dpu | n_dpus=%u n_ranks=%u total_payload_B=%lu dpu_payload_B=%lu | latency_us=%f throughput_MiBps=%f\n",
+				n_dpus, n_ranks,
+				payload_size * n_dpus, payload_size,
+				time_us,
+				payload_size * n_dpus / (time_us * M_to_Mi)
 			);
 		} else if (*(tjp->arg<1>()) == DPU_XFER_FROM_DPU) {
-			printf("[::] dpu_push_from_dpu | n_ranks=%u total_payload_B=%lu dpu_payload_B=%lu | latency_us=%f throughput_Bps=%f\n",
-				n_ranks, payload_size * n_dpus, payload_size, time_us, payload_size * n_dpus * 1000000.0 / time_us
+			printf("[::] dpu_push_from_dpu | n_dpus=%u n_ranks=%u total_payload_B=%lu dpu_payload_B=%lu | latency_us=%f throughput_MiBps=%f\n",
+				n_dpus, n_ranks,
+				payload_size * n_dpus, payload_size,
+				time_us,
+				payload_size * n_dpus / (time_us * M_to_Mi)
 			);
 		}
 	}

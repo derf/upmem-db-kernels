@@ -6,6 +6,8 @@ aspect DfatoolCPUTiming {
 	struct timeval starttime;
 	struct timeval stoptime;
 
+	double const M_to_Mi = 1.048576; /* 2^20 / 1e6 */
+
 	void dfatool_head(const char* function_name)
 	{
 		printf("[::] %s | n_threads=%u n_elements=%lu n_elements_per_thread=%lu ",
@@ -21,7 +23,7 @@ aspect DfatoolCPUTiming {
 		printf("| latency_us=%f throughput_Mrps=%f throughput_MiBps=%f\n",
 			latency_us,
 			n_elements / latency_us,
-			n_elements * sizeof(T) / (latency_us * 1.048576)
+			n_elements * sizeof(T) / (latency_us * M_to_Mi)
 		);
 	}
 
