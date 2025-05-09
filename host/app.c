@@ -295,7 +295,7 @@ int main(int argc, char **argv)
 	 */
 	assert((unsigned long)n_dpus * 8126464 > p.n_elements);
 
-	printf("Allocated %d DPUs across %d ranks for %lu elements (%.1f MiB data)\n", n_dpus, n_ranks, p.n_elements, (double)p.n_elements * sizeof(T) / (1024 * 1024));
+	printf("Allocated %d DPUs across %d ranks for %lu elements (%.2f GiB data)\n", n_dpus, n_ranks, p.n_elements, (double)p.n_elements * sizeof(T) / (1<<30));
 
 	set_n_elements_dpu(n_elements);
 
