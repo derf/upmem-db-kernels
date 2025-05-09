@@ -6,73 +6,45 @@ aspect DfatoolCPUTiming {
 	struct timeval starttime;
 	struct timeval stoptime;
 
-	advice execution("% host_count(...)") : around() {
-		gettimeofday(&starttime, NULL);
-		tjp->proceed();
-		gettimeofday(&stoptime, NULL);
-		printf("[::] host_count | n_threads=%u n_elements=%lu n_elements_per_thread=%lu ",
+	void dfatool_head(const char* function_name)
+	{
+		printf("[::] %s | n_threads=%u n_elements=%lu n_elements_per_thread=%lu ",
+			function_name,
 			p.n_threads,
 			n_elements,
 			n_elements / p.n_threads
-		);
-		printf("| latency_us=%f\n",
-			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
 		);
 	}
 
-	advice execution("% host_select(...)") : around() {
-		gettimeofday(&starttime, NULL);
-		tjp->proceed();
-		gettimeofday(&stoptime, NULL);
-		printf("[::] host_select | n_threads=%u n_elements=%lu n_elements_per_thread=%lu ",
-			p.n_threads,
-			n_elements,
-			n_elements / p.n_threads
-		);
-		printf("| latency_us=%f\n",
-			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
+	void dfatool_tail(double latency_us)
+	{
+		printf("| latency_us=%f throughput_Mrps=%f throughput_MiBps=%f\n",
+			latency_us,
+			n_elements / latency_us,
+			n_elements * sizeof(T) / (latency_us * 1.048576)
 		);
 	}
 
-	advice execution("% host_insert(...)") : around() {
+	advice execution("% host_count(...)")
+			|| execution("% host_select(...)")
+			|| execution("% host_insert(...)")
+			|| execution("% host_delete(...)")
+		: around() {
 		gettimeofday(&starttime, NULL);
 		tjp->proceed();
 		gettimeofday(&stoptime, NULL);
-		printf("[::] host_insert | n_threads=%u n_elements=%lu n_elements_per_thread=%lu ",
-			p.n_threads,
-			n_elements,
-			n_elements / p.n_threads
-		);
-		printf("| latency_us=%f\n",
-			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
-		);
-	}
-
-	advice execution("% host_delete(...)") : around() {
-		gettimeofday(&starttime, NULL);
-		tjp->proceed();
-		gettimeofday(&stoptime, NULL);
-		printf("[::] host_delete | n_threads=%u n_elements=%lu n_elements_per_thread=%lu ",
-			p.n_threads,
-			n_elements,
-			n_elements / p.n_threads
-		);
-		printf("| latency_us=%f\n",
-			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
-		);
+		double latency_us = (stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec);
+		dfatool_head(tjp->signature());
+		dfatool_tail(latency_us);
 	}
 
 	advice execution("% host_update(...)") : around() {
 		gettimeofday(&starttime, NULL);
 		tjp->proceed();
 		gettimeofday(&stoptime, NULL);
-		printf("[::] host_update | n_threads=%u n_elements=%lu n_elements_per_thread=%lu ",
-			p.n_threads,
-			n_elements,
-			n_elements / p.n_threads
-		);
-		printf("| latency_us=%f\n",
-			(stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec)
-		);
+		double latency_us = (stoptime.tv_sec - starttime.tv_sec) * 1000000.0 + (stoptime.tv_usec - starttime.tv_usec);
+		dfatool_head(tjp->signature());
+		printf("n_elements_updated=%lu ", *(tjp->result()));
+		dfatool_tail(latency_us);
 	}
 };
