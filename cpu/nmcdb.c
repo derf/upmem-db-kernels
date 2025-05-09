@@ -31,11 +31,12 @@ int numa_node_cpu = -1;
 unsigned int n_count = 0;
 unsigned int n_select = 0;
 
+struct Params p;
+
 int main(int argc, char **argv)
 {
 	double time;
 	double total_time = 0;
-	struct Params p;
 	unsigned long count;
 
 	parse_params(argc, argv, &p);

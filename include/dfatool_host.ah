@@ -2,7 +2,7 @@
 
 #include <sys/time.h>
 
-aspect DfatoolTiming {
+aspect DfatoolHostTiming {
 	struct timeval starttime;
 	struct timeval stoptime;
 	uint32_t n_ranks;
@@ -66,9 +66,3 @@ aspect DfatoolTiming {
 		}
 	}
 };
-
-
-
-
-
-
