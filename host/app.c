@@ -61,7 +61,7 @@ void startOperation(enum benchmark_statements benchmark_op)
 void endOperation() {}
 #endif
 
-static unsigned long upmem_count(unsigned int n_elements_dpu, enum predicates predicate, uint64_t argument)
+static unsigned long upmem_count(enum predicates predicate, uint64_t argument)
 {
 	unsigned int i = 0;
 	startTimer();
@@ -107,7 +107,7 @@ static unsigned long upmem_count(unsigned int n_elements_dpu, enum predicates pr
 	return result_dpu;
 }
 
-static void upmem_select(unsigned int n_elements_dpu, enum predicates predicate, uint64_t argument)
+static void upmem_select(enum predicates predicate, uint64_t argument)
 {
 	unsigned int i = 0;
 	startTimer();
@@ -182,7 +182,7 @@ static unsigned int upmem_update(uint64_t argument)
 		DPU_ASSERT(dpu_prepare_xfer(dpu, &dpu_results[i]));
 	}
 	DPU_ASSERT(dpu_push_xfer(dpu_set, DPU_XFER_FROM_DPU, "DPU_RESULTS", 0, sizeof(dpu_results_t), DPU_XFER_DEFAULT));
-	unsigned int result_dpu = 0;
+	unsigned long result_dpu = 0;
 	for (i = 0; i < n_dpus; i++) {
 		//printf("DPU %4d count == %d\n", i, dpu_results[i].count);
 		result_dpu += dpu_results[i].count;
@@ -342,7 +342,7 @@ int main(int argc, char **argv)
 		if (benchmark_events[i].op == op_count) {
 			n_count += 1;
 			db_to_upmem();
-			result_upmem = upmem_count(n_elements_dpu, benchmark_events[i].predicate, benchmark_events[i].argument);
+			result_upmem = upmem_count(benchmark_events[i].predicate, benchmark_events[i].argument);
 
 			if (p.verify) {
 				result_host = host_count(benchmark_events[i].predicate, benchmark_events[i].argument);
@@ -353,7 +353,7 @@ int main(int argc, char **argv)
 		} else if (benchmark_events[i].op == op_select) {
 			n_select += 1;
 			db_to_upmem();
-			upmem_select(n_elements_dpu, benchmark_events[i].predicate, benchmark_events[i].argument);
+			upmem_select(benchmark_events[i].predicate, benchmark_events[i].argument);
 
 			if (p.verify) {
 				result_upmem = count_bits(bitmasks);
@@ -404,7 +404,7 @@ int main(int argc, char **argv)
 
 			if (p.verify) {
 				host_update(bitmasks, benchmark_events[i].argument);
-				result_upmem = upmem_count(n_elements_dpu, pred_eq, benchmark_events[i].argument);
+				result_upmem = upmem_count(pred_eq, benchmark_events[i].argument);
 				result_host = host_count(pred_eq, benchmark_events[i].argument);
 				printf("update: host %lu =?= %lu upmem (%lu)\n", result_host, result_upmem, benchmark_events[i].argument);
 				assert(result_host == result_upmem);
