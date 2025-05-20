@@ -26,6 +26,16 @@ def make_write_op(op=None):
         return "{op_" + op + ", (enum predicates)0, " + str(pred_arg) + "},"
 
 
+def make_add_op(op=None):
+    if not op:
+        op = random.choice("insert".split())
+
+    if op == "insert":
+        # number of elements
+        pred_arg = 1024 * random.choice((128, 256, 512, 1024, 2048))
+        return "{op_" + op + ", (enum predicates)0, " + str(pred_arg) + "},"
+
+
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__
@@ -33,7 +43,8 @@ def main():
     parser.add_argument("--operation", type=str)
     parser.add_argument("--n-operations", type=int, default=200)
     parser.add_argument("--n-consecutive", type=int, default=200)
-    parser.add_argument("--with-writes", action="store_true")
+    parser.add_argument("--with-add", action="store_true")
+    parser.add_argument("--with-write", action="store_true")
     args = parser.parse_args()
 
     print("struct benchmark_event benchmark_events[] = {")
@@ -46,8 +57,10 @@ def main():
             consecutive_count = 0
             have_valid_bitmask = False
         else:
-            if args.with_writes and have_valid_bitmask and random.random() < 0.33:
+            if args.with_write and have_valid_bitmask and random.random() < 0.33:
                 print(make_write_op())
+            elif args.with_add and random.random() < 0.33:
+                print(make_add_op())
             else:
                 line = make_read_op(args.operation)
                 if "select" in line:
