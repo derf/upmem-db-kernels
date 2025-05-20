@@ -9,7 +9,7 @@ run_benchmark_nmc()
 	make -B tinos=1 aspectc=1 dfatool_timing=0 aspectc_timing=1 2> /dev/null
 	numactl -m ${numa_mem} -C ${numa_cores} bin/host_code -i ${n_elements} -n ${n_threads} -r ${n_ranks}
 	if [ "$n_operations" = 1 ]; then
-		util/generate-benchmark.py --n-operations=100 --with-write > include/benchmark_events.h
+		util/generate-benchmark.py --n-operations=100 --with-add --with-write > include/benchmark_events.h
 		make -B tinos=1 aspectc=1 dfatool_timing=0 aspectc_timing=1 2> /dev/null
 		numactl -m ${numa_mem} -C ${numa_cores} bin/host_code -i ${n_elements} -n ${n_threads} -r ${n_ranks}
 	fi
