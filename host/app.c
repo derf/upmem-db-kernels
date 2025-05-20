@@ -36,7 +36,7 @@ uint32_t n_ranks;
 bool data_on_dpus = false;
 bool data_on_dpus_changed = false;
 
-unsigned int n_elements_dpu, n_fill_dpu;
+unsigned int n_elements_dpu, n_fill_dpu, first_filled_dpu;
 
 unsigned int n_reads = 0;
 unsigned int n_writes = 0;
@@ -70,8 +70,10 @@ static unsigned long upmem_count(unsigned int n_elements_dpu, enum predicates pr
 		input_arguments[i].kernel = kernel_count;
 		input_arguments[i].predicate = predicate;
 		input_arguments[i].predicate_arg = argument;
-		if (i == n_dpus - 1) {
-			input_arguments[i].size -= n_fill_dpu * sizeof(T);
+		if (i == first_filled_dpu) {
+			input_arguments[i].size = (n_elements_dpu - (n_fill_dpu % n_elements_dpu)) * sizeof(T);
+		} else if (i > first_filled_dpu) {
+			input_arguments[i].size = 0;
 		}
 		DPU_ASSERT(dpu_prepare_xfer(dpu, &input_arguments[i]));
 	}
@@ -114,8 +116,10 @@ static void upmem_select(unsigned int n_elements_dpu, enum predicates predicate,
 		input_arguments[i].kernel = kernel_select;
 		input_arguments[i].predicate = predicate;
 		input_arguments[i].predicate_arg = argument;
-		if (i == n_dpus - 1) {
-			input_arguments[i].size -= n_fill_dpu * sizeof(T);
+		if (i == first_filled_dpu) {
+			input_arguments[i].size = (n_elements_dpu - (n_fill_dpu % n_elements_dpu)) * sizeof(T);
+		} else if (i > first_filled_dpu) {
+			input_arguments[i].size = 0;
 		}
 		DPU_ASSERT(dpu_prepare_xfer(dpu, &input_arguments[i]));
 	}
@@ -150,8 +154,10 @@ static unsigned int upmem_update(uint64_t argument)
 		input_arguments[i].size = n_elements_dpu * sizeof(T);
 		input_arguments[i].kernel = kernel_update;
 		input_arguments[i].predicate_arg = argument;
-		if (i == n_dpus - 1) {
-			input_arguments[i].size -= n_fill_dpu * sizeof(T);
+		if (i == first_filled_dpu) {
+			input_arguments[i].size = (n_elements_dpu - (n_fill_dpu % n_elements_dpu)) * sizeof(T);
+		} else if (i > first_filled_dpu) {
+			input_arguments[i].size = 0;
 		}
 		DPU_ASSERT(dpu_prepare_xfer(dpu, &input_arguments[i]));
 	}
@@ -269,9 +275,9 @@ static void set_n_elements_dpu(unsigned long n_elem)
 	}
 
 	n_fill_dpu = n_elements_dpu * n_dpus - n_elem;
+	first_filled_dpu = n_dpus - (n_fill_dpu / n_elements_dpu) - (n_fill_dpu % n_elements_dpu ? 1 : 0);
 
-	printf("Using %d elements per DPU (filling DPU %d with %d non-elements)\n", n_elements_dpu, n_dpus -1, n_fill_dpu);
-	assert(n_fill_dpu < n_elements_dpu);
+	printf("Using %d elements per DPU (filling DPUs %d..%d with %d non-elements)\n", n_elements_dpu, first_filled_dpu, n_dpus -1, n_fill_dpu);
 }
 
 int main(int argc, char **argv)
