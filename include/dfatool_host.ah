@@ -8,8 +8,6 @@ aspect DfatoolHostTiming {
 	uint32_t n_ranks = 0;
 	uint32_t n_dpus = 0;
 
-	unsigned long n_elements;
-
 	benchmark_statements bench_op;
 	unsigned int _data_on_dpus, _data_on_dpus_changed;
 
@@ -21,7 +19,6 @@ aspect DfatoolHostTiming {
 
 	advice call("% parse_params(...)"): after() {
 		Params* p = *(tjp->arg<2>());
-		n_elements = p->n_elements;
 		n_ranks = p->n_ranks;
 	}
 
