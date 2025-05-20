@@ -21,6 +21,8 @@ mkdir -p log/$(hostname)
 
 fn=log/$(hostname)/ccmcc25
 
+echo "nodmc-upmem-db  $(git describe --all --long)  $(git rev-parse HEAD)  $(date -R)" >> ${fn}.txt
+
 parallel -j1 --eta --joblog ${fn}.node1.joblog --resume --header : \
 	run_benchmark_nmc numa_mem={numa_mem} numa_cores={numa_cores} n_elements={n_elements} n_threads={n_threads} n_ranks={n_ranks} operation={operation} n_operations={n_operations} \
 	::: numa_mem 1 \
