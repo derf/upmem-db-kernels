@@ -9,6 +9,14 @@ enum benchmark_statements {
 	nr_benchmark_statements = 5
 };
 
+static char* const statement_names[] = {
+	(char* const)"count",
+	(char* const)"select",
+	(char* const)"insert",
+	(char* const)"update",
+	(char* const)"delete",
+};
+
 struct benchmark_event {
 	enum benchmark_statements op;
 	enum predicates predicate;

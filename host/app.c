@@ -53,6 +53,14 @@ double total_cpu = 0;
 double total_read_result = 0;
 double total_read_data = 0;
 
+#if ASPECTC
+void startOperation(enum benchmark_statements benchmark_op)
+{
+	(void)benchmark_op;
+}
+void endOperation() {}
+#endif
+
 static unsigned long upmem_count(unsigned int n_elements_dpu, enum predicates predicate, uint64_t argument)
 {
 	unsigned int i = 0;
@@ -320,6 +328,11 @@ int main(int argc, char **argv)
 #endif
 
 	for (unsigned int i = 0; i < sizeof(benchmark_events) / sizeof(struct benchmark_event); i++) {
+
+#if ASPECTC
+		startOperation(benchmark_events[i].op);
+#endif
+
 		if (benchmark_events[i].op == op_count) {
 			n_count += 1;
 			db_to_upmem();
@@ -380,6 +393,7 @@ int main(int argc, char **argv)
 
 		} else if (benchmark_events[i].op == op_update) {
 			n_update += 1;
+			db_to_upmem();
 			upmem_update(benchmark_events[i].argument);
 
 			if (p.verify) {
@@ -392,6 +406,10 @@ int main(int argc, char **argv)
 		} else {
 			printf("UNSUPPORTED BENCHMARK EVENT %d\n", benchmark_events[i].op);
 		}
+
+#if ASPECTC
+		endOperation();
+#endif
 	}
 
 	db_from_upmem();
