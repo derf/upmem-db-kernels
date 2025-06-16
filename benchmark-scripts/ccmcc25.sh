@@ -1,7 +1,5 @@
 #!/bin/bash
 
-/opt/upmem/upmem-2025.1.0-Linux-x86_64/upmem_env.sh
-
 run_benchmark_nmc()
 {
 	local "$@"
@@ -19,20 +17,26 @@ export -f run_benchmark_nmc
 
 mkdir -p log/$(hostname)
 
-fn=log/$(hostname)/ccmcc25
+for sdk in 2023.2.0 2024.1.0 2024.2.0 2025.1.0; do
 
-echo "nodmc-upmem-db  $(git describe --all --long)  $(git rev-parse HEAD)  $(date -R)" >> ${fn}.node1.txt
+	source /opt/upmem/upmem-${sdk}-Linux-x86_64/upmem_env.sh
 
-parallel -j1 --eta --joblog ${fn}.node1.joblog --resume --header : \
-	run_benchmark_nmc numa_mem={numa_mem} numa_cores={numa_cores} n_elements={n_elements} n_threads={n_threads} n_ranks={n_ranks} operation={operation} n_operations={n_operations} \
-	::: numa_mem 1 \
-	::: numa_cores 8-15 \
-	::: operation count select \
-	::: n_operations 1 2 4 8 12 16 20 \
-	::: n_elements $((1024*1024)) $((1024*1024*2)) $((1024*1024*4)) $((1024*1024*8)) $((1024*1024*16)) $((1024*1024*32)) $((1024*1024*64)) $((1024*1024*128)) $((1024*1024*256)) $((1024*1024*512)) $((1024*1024*1024)) $((1024*1024*1024*2)) $((1024*1024*1024*4)) \
-	::: n_threads 8 \
-	::: n_ranks 1 2 4 8 12 16 20 24 28 32 36 40 \
-	::: i 1 2 3 4 5 >> ${fn}.node1.txt \
->> ${fn}.node1.txt
+	fn=log/$(hostname)/ccmcc25-${sdk}
 
-git checkout include/benchmark_events.h
+	echo "nodmc-upmem-db  $(git describe --all --long)  $(git rev-parse HEAD)  $(date -R)" >> ${fn}.txt
+
+	parallel -j1 --eta --joblog ${fn}.joblog --resume --header : \
+		run_benchmark_nmc numa_mem={numa_mem} numa_cores={numa_cores} n_elements={n_elements} n_threads={n_threads} n_ranks={n_ranks} operation={operation} n_operations={n_operations} \
+		::: numa_mem 1 \
+		::: numa_cores 8-15 \
+		::: operation count select \
+		::: n_operations 1 2 4 8 12 16 20 \
+		::: n_elements $((1024*1024)) $((1024*1024*2)) $((1024*1024*4)) $((1024*1024*8)) $((1024*1024*16)) $((1024*1024*32)) $((1024*1024*64)) $((1024*1024*128)) $((1024*1024*256)) $((1024*1024*512)) $((1024*1024*1024)) $((1024*1024*1024*2)) $((1024*1024*1024*4)) \
+		::: n_threads 8 \
+		::: n_ranks 1 2 4 8 12 16 20 24 28 32 36 40 \
+		::: i 1 2 3 4 5 >> ${fn}.txt \
+	>> ${fn}.txt
+
+done
+
+	git checkout include/benchmark_events.h
